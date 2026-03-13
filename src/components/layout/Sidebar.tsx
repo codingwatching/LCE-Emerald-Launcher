@@ -1,5 +1,4 @@
 import React from 'react';
-import { openUrl } from "@tauri-apps/plugin-opener";
 import { TauriService } from '../../services/tauri';
 
 interface SidebarProps {
@@ -9,6 +8,7 @@ interface SidebarProps {
   updateAllStatus: () => void;
   installingInstance: string | null;
   downloadProgress: number;
+  showTeamModal: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -18,6 +18,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   updateAllStatus,
   installingInstance,
   downloadProgress,
+  showTeamModal,
 }) => {
   return (
     <aside className="w-64 bg-[#2a2a2a] border-r-4 border-black p-6 flex flex-col gap-2 z-20 shadow-[inset_-4px_0_#555]">
@@ -86,7 +87,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div
         onClick={() => {
           playSfx('click.wav');
-          openUrl("https://github.com/Emerald-Legacy-Launcher");
+          showTeamModal();
         }}
         className={`${installingInstance ? "pt-6" : "mt-auto pt-6"} flex flex-col items-center border-t-4 border-black/30 cursor-pointer group`}
       >

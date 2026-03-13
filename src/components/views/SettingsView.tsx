@@ -18,6 +18,7 @@ interface SettingsViewProps {
   isMuted: boolean;
   setIsMuted: (muted: boolean) => void;
   playSfx: (name: string, multiplier?: number) => void;
+  showTeamModal: () => void;
 }
 
 export const SettingsView: React.FC<SettingsViewProps> = ({
@@ -34,6 +35,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   isMuted,
   setIsMuted,
   playSfx,
+  showTeamModal,
 }) => {
   return (
     <div className="w-full max-w-3xl bg-black/80 p-12 border-4 border-black h-full overflow-y-auto no-scrollbar animate-in fade-in">
@@ -144,7 +146,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </h3>
           <p className="text-xl text-white leading-relaxed mb-6 opacity-90">
             This project is proudly maintained by the{' '}
-            <span className="text-emerald-400">Emerald Team</span>, with{' '}
+            <span 
+              className="text-emerald-400 cursor-pointer hover:underline"
+              onClick={() => {
+                playSfx('click.wav');
+                showTeamModal();
+              }}
+            >
+              Emerald Team
+            </span>, with{' '}
             <span className="text-emerald-400">KayJann</span> as the owner.
             Our goal is to create a central hub for the LCE community to bring us all together.
           </p>

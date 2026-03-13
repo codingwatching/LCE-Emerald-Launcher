@@ -11,6 +11,7 @@ import { VersionsView } from "./components/views/VersionsView";
 import { SettingsView } from "./components/views/SettingsView";
 import { FirstRunView } from "./components/views/FirstRunView";
 import { ReinstallModal } from "./components/modals/ReinstallModal";
+import { TeamModal } from "./components/modals/TeamModal";
 import { Notification } from "./components/common/Notification";
 import "./index.css";
 
@@ -24,6 +25,7 @@ export default function App() {
   const [availableRunners, setAvailableRunners] = useState<Runner[]>([]);
   const [selectedRunner, setSelectedRunner] = useState<string>("");
   const [isLinux, setIsLinux] = useState(false);
+  const [teamModalVisible, setTeamModalVisible] = useState(false);
 
   const { musicVol, setMusicVol, sfxVol, setSfxVol, isMuted, setIsMuted } = useSettings();
   const { musicRef, playRandomMusic, playSfx, ensureAudio } = useAudio(musicVol, sfxVol, isMuted);
@@ -80,6 +82,7 @@ export default function App() {
         updateAllStatus={updateAllStatus}
         installingInstance={installingInstance}
         downloadProgress={downloadProgress}
+        showTeamModal={() => setTeamModalVisible(true)}
       />
 
       <main className="flex-1 relative h-full">
@@ -123,6 +126,7 @@ export default function App() {
               isMuted={isMuted}
               setIsMuted={setIsMuted}
               playSfx={playSfx}
+              showTeamModal={() => setTeamModalVisible(true)}
             />
           )}
         </div>
@@ -135,6 +139,13 @@ export default function App() {
               executeInstall(id, url);
               setReinstallModal(null);
             }}
+            playSfx={playSfx}
+          />
+        )}
+
+        {teamModalVisible && (
+          <TeamModal
+            onClose={() => setTeamModalVisible(false)}
             playSfx={playSfx}
           />
         )}
