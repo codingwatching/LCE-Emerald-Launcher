@@ -9,6 +9,7 @@ interface SidebarProps {
   installingInstance: string | null;
   downloadProgress: number;
   showTeamModal: () => void;
+  gamepadConnected: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = (props) => {
@@ -20,6 +21,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
     installingInstance,
     downloadProgress,
     showTeamModal,
+    gamepadConnected,
   } = props;
 
   const [collapsed, setCollapsed] = useState(false);
@@ -60,6 +62,19 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
               </h1>
           </div>
         </div>
+        
+        {gamepadConnected && (
+          <div className="flex justify-center mb-4 gap-4 animate-in fade-in zoom-in">
+            <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded">
+              <img src="/images/ButtonLeftBumper.png" className="gp-hint" alt="LB" />
+              <span className="text-[10px] text-stone-400">PREV</span>
+            </div>
+            <div className="flex items-center gap-2 bg-black/30 px-3 py-1 rounded">
+              <img src="/images/ButtonRightBumper.png" className="gp-hint" alt="RB" />
+              <span className="text-[10px] text-stone-400">NEXT</span>
+            </div>
+          </div>
+        )}
         
         <nav className="flex flex-col gap-4">
           {navItems.map(item => (

@@ -13,6 +13,7 @@ interface HomeViewProps {
   playSfx: (name: string, multiplier?: number) => void;
   setActiveTab: (tab: string) => void;
   skinBase64?: string;
+  gamepadConnected: boolean;
 }
 
 const SPLASH_OPTIONS = [
@@ -39,7 +40,8 @@ export const HomeView: React.FC<HomeViewProps> = (props) => {
     fadeAndLaunch,
     playSfx,
     setActiveTab,
-    skinBase64
+    skinBase64,
+    gamepadConnected
   } = props;
 
   const name = username.length > 20 ? `${username.slice(0, 16)}...` : username;
@@ -125,12 +127,15 @@ export const HomeView: React.FC<HomeViewProps> = (props) => {
                 onClick={fadeAndLaunch}
                 disabled={isLocked}
                 onMouseEnter={() => playSfx('hover')}
-                className={`h-20 text-4xl text-[#3e3e3e] hover:text-white legacy-text-shadow transition-all bg-[length:100%_100%] bg-no-repeat ${isLocked
+                className={`h-20 text-4xl text-[#3e3e3e] hover:text-white legacy-text-shadow transition-all bg-[length:100%_100%] bg-no-repeat flex items-center justify-center gap-4 ${isLocked
                   ? "bg-[url('/images/button.png')] opacity-50 grayscale cursor-default"
                   : "bg-[url('/images/button.png')] hover:bg-[url('/images/button_highlighted.png')] hover:scale-[1.02] active:scale-95 cursor-pointer"
                   }`}
               >
-                {installingInstance ? "INSTALLING..." : isRunning ? "RUNNING..." : "PLAY"}
+                {gamepadConnected && !isLocked && (
+                  <img src="/images/ButtonA.png" className="w-10 h-10 animate-pulse" alt="A" />
+                )}
+                <span>{installingInstance ? "INSTALLING..." : isRunning ? "RUNNING..." : "PLAY"}</span>
               </button>
             </div>
           ) : (

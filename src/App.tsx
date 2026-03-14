@@ -3,6 +3,7 @@ import { useAudio } from "./hooks/useAudio";
 import { useSettings } from "./hooks/useSettings";
 import { useGameInstances } from "./hooks/useGameInstances";
 import { useLauncher } from "./hooks/useLauncher";
+import { useGamepad } from "./hooks/useGamepad";
 import { TauriService } from "./services/tauri";
 import { AppConfig, Runner, ReinstallModalData, McNotification } from "./types";
 import { Sidebar } from "./components/layout/Sidebar";
@@ -15,6 +16,7 @@ import { TeamModal } from "./components/modals/TeamModal";
 import { Notification } from "./components/common/Notification";
 import { PanoramaBackground } from "./components/common/PanoramaBackground";
 import { ClickParticles } from "./components/common/ClickParticles";
+import { listen } from '@tauri-apps/api/event';
 import "./index.css";
 
 export default function App() {
@@ -40,7 +42,7 @@ export default function App() {
   const { musicRef, playRandomMusic, playSfx, ensureAudio } = useAudio(musicVol, sfxVol, isMuted);
   const { installedStatus, installingInstance, downloadProgress, executeInstall, updateAllStatus } = useGameInstances(playSfx, setMcNotif);
   const { isRunning, fadeAndLaunch } = useLauncher(selectedInstance, musicRef, isMuted, musicVol, playRandomMusic, playSfx);
-
+  const { connected: gamepadConnected } = useGamepad(activeTab, setActiveTab, playSfx);
   useEffect(() => {
     const initApp = async () => {
       const config = await TauriService.loadConfig() as AppConfig;
@@ -99,6 +101,7 @@ export default function App() {
         installingInstance={installingInstance}
         downloadProgress={downloadProgress}
         showTeamModal={() => setTeamModalVisible(true)}
+        gamepadConnected={gamepadConnected}
       />
 
       <main className="flex-1 relative h-full flex flex-col overflow-hidden">
@@ -117,6 +120,7 @@ export default function App() {
               playSfx={playSfx}
               setActiveTab={setActiveTab}
               skinBase64={skinBase64}
+              gamepadConnected={gamepadConnected}
             />
           )}
 
