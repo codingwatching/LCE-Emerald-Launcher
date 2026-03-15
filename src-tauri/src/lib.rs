@@ -73,13 +73,13 @@ fn load_config(app: AppHandle) -> AppConfig {
             return config;
         }
     }
-    
+
     let old_path = get_app_dir(&app).join("emerald_legacy_config.txt");
     let username = fs::read_to_string(old_path).unwrap_or_else(|_| "Player".into());
-    AppConfig { 
-        username, 
-        linux_runner: None, 
-        skin_base64: None, 
+    AppConfig {
+        username,
+        linux_runner: None,
+        skin_base64: None,
         skin_library: None,
         theme_style_id: None,
         theme_palette_id: None,
@@ -91,7 +91,7 @@ fn get_external_palettes(app: AppHandle) -> Vec<ThemePalette> {
     let themes_dir = get_app_dir(&app).join("themes");
     let _ = fs::create_dir_all(&themes_dir);
     let mut palettes = Vec::new();
-    
+
     if let Ok(entries) = fs::read_dir(themes_dir) {
         for entry in entries.flatten() {
             let path = entry.path();
@@ -118,13 +118,13 @@ fn import_theme(app: AppHandle) -> Result<String, String> {
         let content = fs::read_to_string(&src_path).map_err(|e| e.to_string())?;
         // Basic validation
         let palette: ThemePalette = serde_json::from_str(&content).map_err(|_| "Invalid theme JSON format".to_string())?;
-        
+
         let themes_dir = get_app_dir(&app).join("themes");
         let _ = fs::create_dir_all(&themes_dir);
-        
+
         let dest_path = themes_dir.join(format!("{}.json", palette.id));
         fs::write(dest_path, content).map_err(|e| e.to_string())?;
-        
+
         Ok(palette.name)
     } else {
         Err("CANCELED".into())
@@ -143,6 +143,18 @@ fn get_available_runners() -> Vec<Runner> {
                 runners.push(Runner {
                     id: "wine".to_string(),
                     name: "System Wine".to_string(),
+                    path,
+                    r#type: "wine".to_string(),
+                });
+            }
+        }
+
+        if let Ok(output) = Command::new("ls").arg("/usr/share/emerald-legacy-launcher/wine/bin/wine").output() {
+            if output.status.success() {
+                let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
+                runners.push(Runner {
+                    id: "flatpaksucks".to_string(),
+                    name: "Default for Flatpak".to_string(),
                     path,
                     r#type: "wine".to_string(),
                 });
@@ -207,13 +219,13 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
     let token = CancellationToken::new();
     let child_token = token.clone();
     { *state.token.lock().await = Some(token); }
-    
+
     if instance_dir.exists() { let _ = fs::remove_dir_all(&instance_dir); }
     fs::create_dir_all(&instance_dir).map_err(|e| e.to_string())?;
-    
+
     let zip_path = root.join(format!("temp_{}.zip", instanceId));
     let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
-    
+
     if !response.status().is_success() {
         return Err(format!("Download failed: {}", response.status()));
     }
@@ -222,7 +234,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
     let mut file = fs::File::create(&zip_path).map_err(|e| e.to_string())?;
     let mut downloaded = 0.0;
     let mut stream = response.bytes_stream();
-    
+
     while let Some(chunk) = stream.next().await {
         if child_token.is_cancelled() {
             drop(file); let _ = fs::remove_file(&zip_path);
@@ -233,10 +245,10 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
         downloaded += chunk.len() as f64;
         if total_size > 0.0 { let _ = app.emit("download-progress", downloaded / total_size * 100.0); }
     }
-    
+
     drop(file);
     { *state.token.lock().await = None; }
-    
+
     #[cfg(target_os = "linux")]
     let status = Command::new("unzip")
         .args(["-q", zip_path.to_str().unwrap(), "-d", instance_dir.to_str().unwrap()])
@@ -248,7 +260,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
         .args(["-xf", zip_path.to_str().unwrap(), "-C", instance_dir.to_str().unwrap()])
         .status()
         .map_err(|e| e.to_string())?;
-        
+
     let _ = fs::remove_file(&zip_path);
 
     if !status.success() {
@@ -257,10 +269,10 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
 
     if let Ok(entries) = fs::read_dir(&instance_dir) {
         let entries_vec: Vec<_> = entries.flatten().collect();
-        
+
         if entries_vec.len() == 1 && entries_vec[0].path().is_dir() {
             let inner_dir = entries_vec[0].path();
-            
+
             if let Ok(inner_entries) = fs::read_dir(&inner_dir) {
                 for inner_entry in inner_entries.flatten() {
                     let file_name = inner_entry.file_name();
@@ -271,7 +283,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
             let _ = fs::remove_dir(&inner_dir);
         }
     }
-    
+
     Ok("Success".into())
 }
 
@@ -282,7 +294,7 @@ async fn launch_game(app: AppHandle, instanceId: String) -> Result<(), String> {
     let instance_dir = root.join("instances").join(&instanceId);
     let config = load_config(app.clone());
     let username = config.username;
-    
+
     let _ = fs::write(instance_dir.join("username.txt"), &username);
 
     if let Some(skin_data) = config.skin_base64 {
@@ -294,7 +306,7 @@ async fn launch_game(app: AppHandle, instanceId: String) -> Result<(), String> {
             let _ = fs::write(skin_dir.join("char.png"), bytes);
         }
     }
-    
+
     let game_exe = instance_dir.join("Minecraft.Client.exe");
     if !game_exe.exists() {
         return Err("Game executable not found in instance folder.".into());
