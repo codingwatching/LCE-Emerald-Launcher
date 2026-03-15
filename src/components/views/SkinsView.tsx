@@ -87,7 +87,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
         <div className="w-full flex flex-col gap-2 mt-4">
           <button
             onClick={() => { playSfx("wood click.wav"); fileInputRef.current?.click(); }}
-            className="legacy-btn w-full py-3 text-xl focus:!border-white focus:scale-[1.02]"
+            className="legacy-btn w-full py-3 text-xl"
           >
             UPLOAD NEW SKIN
           </button>
@@ -97,7 +97,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
             style={{ 
               boxShadow: "inset calc(3px * var(--shadow-intensity)) calc(3px * var(--shadow-intensity)) #ff5555, inset calc(-3px * var(--shadow-intensity)) calc(-3px * var(--shadow-intensity)) #4a0000"
             } as React.CSSProperties}
-            className="legacy-btn px-6 py-2 text-sm transition-colors self-center !text-white hover:!bg-[#aa0000] focus:!border-white focus:scale-[1.05]"
+            className="legacy-btn px-6 py-2 text-sm transition-colors self-center !text-white hover:!bg-[#aa0000]"
           >
             RESET SKIN
           </button>
@@ -129,7 +129,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
                   } focus-within:!border-white focus-within:scale-[1.03] focus-within:z-50 focus-within:shadow-[0_0_25px_rgba(255,255,255,0.2)]`}
                 >
                   <button
-                    className="h-48 w-full cursor-pointer relative block focus:outline-none"
+                    className="h-48 w-full cursor-pointer relative block outline-none"
                     onClick={() => {
                       playSfx("wood click.wav");
                       onSelectSkin(item.skinBase64);
