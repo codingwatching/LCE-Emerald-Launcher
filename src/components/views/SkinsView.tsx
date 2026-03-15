@@ -87,7 +87,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
         <div className="w-full flex flex-col gap-2 mt-4">
           <button
             onClick={() => { playSfx("wood click.wav"); fileInputRef.current?.click(); }}
-            className="legacy-btn w-full py-3 text-xl"
+            className="legacy-btn w-full py-3 text-xl focus:!border-white focus:scale-[1.02]"
           >
             UPLOAD NEW SKIN
           </button>
@@ -97,7 +97,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
             style={{ 
               boxShadow: "inset calc(3px * var(--shadow-intensity)) calc(3px * var(--shadow-intensity)) #ff5555, inset calc(-3px * var(--shadow-intensity)) calc(-3px * var(--shadow-intensity)) #4a0000"
             } as React.CSSProperties}
-            className="legacy-btn px-6 py-2 text-sm transition-colors self-center !text-white hover:!bg-[#aa0000]"
+            className="legacy-btn px-6 py-2 text-sm transition-colors self-center !text-white hover:!bg-[#aa0000] focus:!border-white focus:scale-[1.05]"
           >
             RESET SKIN
           </button>
@@ -122,13 +122,14 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
               {skinLibrary.map((item) => (
                 <div
                   key={item.id}
-                  className={`relative group bg-[#2a2a2a] border-[var(--border-width)] transition-all duration-150 rounded-[var(--radius-base)] ${skinBase64 === item.skinBase64
-                    ? "border-[var(--accent-primary)] shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-                    : "border-[var(--border-primary)] hover:border-[var(--border-secondary)] shadow-[inset_calc(4px*var(--shadow-intensity))_calc(4px*var(--shadow-intensity))_#444]"
-                    } focus-within:ring-4 focus-within:ring-[var(--accent-primary)] focus-within:z-50`}
+                  className={`relative group bg-[#2a2a2a] border-[var(--border-width)] transition-all duration-150 rounded-[var(--radius-base)] ${
+                    skinBase64 === item.skinBase64
+                      ? "border-[var(--accent-primary)] shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                      : "border-[var(--border-primary)] hover:border-[var(--border-secondary)] shadow-[inset_calc(4px*var(--shadow-intensity))_calc(4px*var(--shadow-intensity))_#444]"
+                  } focus-within:!border-white focus-within:scale-[1.03] focus-within:z-50 focus-within:shadow-[0_0_25px_rgba(255,255,255,0.2)]`}
                 >
                   <button
-                    className="h-48 w-full cursor-pointer relative block focus:outline-white focus:outline-offset-[-4px]"
+                    className="h-48 w-full cursor-pointer relative block focus:outline-none"
                     onClick={() => {
                       playSfx("wood click.wav");
                       onSelectSkin(item.skinBase64);

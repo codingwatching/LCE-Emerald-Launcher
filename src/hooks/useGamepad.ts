@@ -13,6 +13,18 @@ export const useGamepad = (
   const tabs = ["home", "versions", "skins", "settings"];
   useEffect(() => {
     activeTabRef.current = activeTab;
+    
+    // Reset focus to the first element when the tab changes
+    const focusable = Array.from(document.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(el => !el.closest("aside")) as HTMLElement[];
+    
+    if (focusable.length > 0) {
+      setTimeout(() => {
+        focusable[0].focus();
+        focusable[0].scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }, 100);
+    }
   }, [activeTab]);
 
   const moveFocus = (dx: number, dy: number) => {
@@ -50,19 +62,19 @@ export const useGamepad = (
       const diffX = center.x - curCenter.x;
       const diffY = center.y - curCenter.y;
 
-      // Check if candidate is in the right direction
-      if (dx > 0 && diffX <= 0) continue;
-      if (dx < 0 && diffX >= 0) continue;
-      if (dy > 0 && diffY <= 0) continue;
-      if (dy < 0 && diffY >= 0) continue;
+    // Check if candidate is in the right direction
+    if (dx > 0 && diffX <= 1) continue; // Added small buffer
+    if (dx < 0 && diffX >= -1) continue;
+    if (dy > 0 && diffY <= 1) continue;
+    if (dy < 0 && diffY >= -1) continue;
 
-      // Distance score: Manhattan distance with a penalty for not being aligned with the axis
-      const dist = Math.sqrt(diffX * diffX + diffY * diffY);
-      const anglePenalty = dx !== 0
-        ? Math.abs(diffY) * 2 // Horizontal movement: penalize vertical offset
-        : Math.abs(diffX) * 2; // Vertical movement: penalize horizontal offset
+    // Distance score: Euclidean distance with reduced alignment penalty
+    const dist = Math.sqrt(diffX * diffX + diffY * diffY);
+    const anglePenalty = dx !== 0
+      ? Math.abs(diffY) * 1.5
+      : Math.abs(diffX) * 1.5;
 
-      const score = dist + anglePenalty;
+    const score = dist + anglePenalty;
 
       if (score < minScore) {
         minScore = score;
@@ -121,7 +133,7 @@ export const useGamepad = (
       const prevY = lastAxes.current[2] ?? 0;
       const deadzone = 0.5;
       if (Math.abs(axisY) > deadzone && Math.abs(prevY) <= deadzone) {
-        moveFocus(0, axisY < 0 ? 1 : -1);
+        moveFocus(0, axisY > 0 ? 1 : -1);
       }
       lastAxes.current[2] = axisY;
       const axisX = gp.axes[1] ?? 0; // LS (X)

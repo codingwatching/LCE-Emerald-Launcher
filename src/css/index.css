@@ -85,7 +85,8 @@ body {
   backdrop-filter: blur(var(--backdrop-blur));
 }
 
-.legacy-btn:hover:not(:disabled) {
+.legacy-btn:hover:not(:disabled),
+.legacy-btn:focus-visible:not(:disabled) {
   background-color: var(--btn-bg);
   background-image: var(--btn-hover-bg-image);
   filter: brightness(1.1);
