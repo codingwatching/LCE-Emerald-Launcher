@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { listen } from "@tauri-apps/api/event";
 import { openUrl } from "@tauri-apps/plugin-opener";
 import { useTheme } from "@/components/theme/ThemeContext";
 import { THEME_STYLES } from "@/types/theme";
@@ -13,6 +14,12 @@ import { TauriService } from "@/services/tauri";
 // Types
 import { Runner } from "@/types";
 
+const DOWNLOADABLE_RUNNERS = [
+  { name: "wine-11.4", label: "WINE 11.4", url: "https://github.com/Kron4ek/Wine-Builds/releases/download/11.4/wine-11.4-amd64.tar.xz" },
+  { name: "proton-10.0", label: "Proton 10.0", url: "https://github.com/Kron4ek/proton-archive/releases/download/10.0/proton-10.0-1.tar.xz" },
+  { name: "proton-9.0-3", label: "Proton 9.0-3", url: "https://github.com/Kron4ek/proton-archive/releases/download/9.0/proton-9.0-3.tar.xz" },
+];
+
 interface SettingsViewProps {
   username: string;
   setUsername: (name: string) => void;
@@ -20,6 +27,7 @@ interface SettingsViewProps {
   selectedRunner: string;
   setSelectedRunner: (runner: string) => void;
   availableRunners: Runner[];
+  setAvailableRunners: (runners: Runner[]) => void;
   musicVol: number;
   setMusicVol: (vol: number) => void;
   sfxVol: number;
@@ -46,6 +54,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   selectedRunner,
   setSelectedRunner,
   availableRunners,
+  setAvailableRunners,
   musicVol,
   setMusicVol,
   sfxVol,
@@ -65,6 +74,40 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   saveConfig
 }) => {
   const { setStyle, setPalette, availablePalettes, refreshPalettes } = useTheme();
+  const [showRunnerPanel, setShowRunnerPanel] = useState(false);
+  const [downloadingRunner, setDownloadingRunner] = useState<string | null>(null);
+  const [runnerProgress, setRunnerProgress] = useState(0);
+  const [runnerError, setRunnerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unlisten = listen<number>("runner-download-progress", (e) =>
+      setRunnerProgress(Math.round(e.payload))
+    );
+    return () => { unlisten.then((f) => f()); };
+  }, []);
+
+  const handleDownloadRunner = async (name: string, url: string) => {
+    setDownloadingRunner(name);
+    setRunnerProgress(0);
+    setRunnerError(null);
+    try {
+      await TauriService.downloadRunner(name, url);
+      playSfx("orb.ogg");
+      const runners = await TauriService.getAvailableRunners();
+      setAvailableRunners(runners);
+      const downloaded = runners.find((r) => r.id === `downloaded_${name}`);
+      if (downloaded) {
+        setSelectedRunner(downloaded.id);
+        saveConfig({ linuxRunner: downloaded.id });
+      }
+    } catch (e: any) {
+      if (e !== "CANCELLED") {
+        setRunnerError(String(e));
+      }
+    }
+    setDownloadingRunner(null);
+    setShowRunnerPanel(false);
+  };
 
   return (
     <div className="w-full max-w-3xl bg-[var(--bg-primary)] p-8 md:p-12 border-[var(--border-width)] border-[var(--border-primary)] h-full overflow-y-auto no-scrollbar animate-in fade-in rounded-[var(--radius-base)] shadow-2xl">
@@ -126,6 +169,54 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </p>
               )}
             </div>
+
+            <button
+              onClick={() => {
+                playSfx("click.wav");
+                setShowRunnerPanel(!showRunnerPanel);
+                setRunnerError(null);
+              }}
+              className="legacy-btn py-3 text-xl uppercase tracking-wide"
+              disabled={!!downloadingRunner}
+            >
+              {showRunnerPanel ? "Hide Downloads" : "Download a Runner"}
+            </button>
+
+            {showRunnerPanel && (
+              <div className="flex flex-col gap-3 bg-[var(--bg-secondary)] p-5 border-[var(--border-width)] border-[var(--border-primary)] shadow-[inset_calc(4px*var(--shadow-intensity))_calc(4px*var(--shadow-intensity))_var(--border-secondary)] rounded-[var(--radius-base)]">
+                <span className="text-sm uppercase opacity-50 tracking-widest">Available Downloads</span>
+                {DOWNLOADABLE_RUNNERS.map((dr) => (
+                  <div key={dr.name} className="flex items-center justify-between gap-4">
+                    <span className="text-lg flex-1">{dr.label}</span>
+                    {downloadingRunner === dr.name ? (
+                      <div className="flex-1 max-w-[200px]">
+                        <div className="mc-progress-container">
+                          <div
+                            className="mc-progress-bar"
+                            style={{ width: `${runnerProgress}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-slate-400 mt-1 block text-center">{runnerProgress}%</span>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          playSfx("wood click.wav");
+                          handleDownloadRunner(dr.name, dr.url);
+                        }}
+                        className="legacy-btn px-5 py-2 text-base"
+                        disabled={!!downloadingRunner}
+                      >
+                        {availableRunners.some((r) => r.id === `downloaded_${dr.name}`) ? "Re-download" : "Download"}
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {runnerError && (
+                  <p className="text-red-500 text-sm mt-1">{runnerError}</p>
+                )}
+              </div>
+            )}
           </div>
         )}
 

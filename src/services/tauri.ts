@@ -14,4 +14,5 @@ export const TauriService = {
   importTheme: () => invoke<string>("import_theme"),
   openInstanceFolder: (instanceId: string) => invoke("open_instance_folder", { instanceId }),
   cancelDownload: () => invoke("cancel_download"),
+  downloadRunner: (name: string, url: string) => invoke<string>("download_runner", { name, url }),
 };

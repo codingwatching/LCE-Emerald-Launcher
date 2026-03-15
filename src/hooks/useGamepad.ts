@@ -10,30 +10,71 @@ export const useGamepad = (
   const lastButtons = useRef<Record<number, boolean>>({});
   const lastAxes = useRef<Record<number, number>>({});
   const activeTabRef = useRef(activeTab);
-  const tabs = ["home", "versions", "settings"];
+  const tabs = ["home", "versions", "skins", "settings"];
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
-  const moveFocus = (direction: number) => {
+  const moveFocus = (dx: number, dy: number) => {
     const focusable = Array.from(document.querySelectorAll(
       'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
     )).filter(el => !el.closest("aside")) as HTMLElement[];
 
     if (focusable.length === 0) return;
-    if (!document.activeElement || document.activeElement === document.body) {
+
+    let current = document.activeElement as HTMLElement;
+    if (!current || !focusable.includes(current)) {
       focusable[0].focus();
+      focusable[0].scrollIntoView({ block: "separate" === "separate" ? "nearest" : "center", behavior: "smooth" });
       playSfx("wood click.wav", 0.5);
       return;
     }
 
-    const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
-    let nextIndex = currentIndex + direction;
-    if (nextIndex < 0) nextIndex = focusable.length - 1;
-    if (nextIndex >= focusable.length) nextIndex = 0;
+    const curRect = current.getBoundingClientRect();
+    const curCenter = {
+      x: curRect.left + curRect.width / 2,
+      y: curRect.top + curRect.height / 2
+    };
 
-    focusable[nextIndex].focus();
-    playSfx("wood click.wav", 0.5);
+    let bestCandidate: HTMLElement | null = null;
+    let minScore = Infinity;
+
+    for (const el of focusable) {
+      if (el === current) continue;
+      const rect = el.getBoundingClientRect();
+      const center = {
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      };
+
+      const diffX = center.x - curCenter.x;
+      const diffY = center.y - curCenter.y;
+
+      // Check if candidate is in the right direction
+      if (dx > 0 && diffX <= 0) continue;
+      if (dx < 0 && diffX >= 0) continue;
+      if (dy > 0 && diffY <= 0) continue;
+      if (dy < 0 && diffY >= 0) continue;
+
+      // Distance score: Manhattan distance with a penalty for not being aligned with the axis
+      const dist = Math.sqrt(diffX * diffX + diffY * diffY);
+      const anglePenalty = dx !== 0
+        ? Math.abs(diffY) * 2 // Horizontal movement: penalize vertical offset
+        : Math.abs(diffX) * 2; // Vertical movement: penalize horizontal offset
+
+      const score = dist + anglePenalty;
+
+      if (score < minScore) {
+        minScore = score;
+        bestCandidate = el;
+      }
+    }
+
+    if (bestCandidate) {
+      bestCandidate.focus();
+      bestCandidate.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      playSfx("wood click.wav", 0.5);
+    }
   };
 
   const update = () => {
@@ -80,13 +121,13 @@ export const useGamepad = (
       const prevY = lastAxes.current[2] ?? 0;
       const deadzone = 0.5;
       if (Math.abs(axisY) > deadzone && Math.abs(prevY) <= deadzone) {
-        moveFocus(axisY < 0 ? 1 : -1);
+        moveFocus(0, axisY < 0 ? 1 : -1);
       }
       lastAxes.current[2] = axisY;
       const axisX = gp.axes[1] ?? 0; // LS (X)
       const prevX = lastAxes.current[1] ?? 0;
       if (Math.abs(axisX) > deadzone && Math.abs(prevX) <= deadzone) {
-        moveFocus(axisX > 0 ? 1 : -1);
+        moveFocus(axisX > 0 ? 1 : -1, 0);
       }
       lastAxes.current[1] = axisX;
     }

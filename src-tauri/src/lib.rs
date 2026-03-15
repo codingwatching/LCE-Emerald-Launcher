@@ -132,7 +132,7 @@ fn import_theme(app: AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
-fn get_available_runners() -> Vec<Runner> {
+fn get_available_runners(app: AppHandle) -> Vec<Runner> {
     let mut runners = Vec::new();
 
     #[cfg(target_os = "linux")]
@@ -185,9 +185,98 @@ fn get_available_runners() -> Vec<Runner> {
                 }
             }
         }
+
+        let runners_dir = get_app_dir(&app).join("runners");
+        let _ = fs::create_dir_all(&runners_dir);
+        if let Ok(entries) = fs::read_dir(&runners_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    let dir_name = entry.file_name().to_string_lossy().to_string();
+                    let wine_bin = path.join("bin").join("wine");
+                    let proton_bin = path.join("proton");
+
+                    if proton_bin.exists() {
+                        runners.push(Runner {
+                            id: format!("downloaded_{}", dir_name),
+                            name: format!("{} (downloaded)", dir_name),
+                            path: path.to_string_lossy().to_string(),
+                            r#type: "proton".to_string(),
+                        });
+                    } else if wine_bin.exists() {
+                        runners.push(Runner {
+                            id: format!("downloaded_{}", dir_name),
+                            name: format!("{} (downloaded)", dir_name),
+                            path: wine_bin.to_string_lossy().to_string(),
+                            r#type: "wine".to_string(),
+                        });
+                    }
+                }
+            }
+        }
     }
 
     runners
+}
+
+#[tauri::command]
+async fn download_runner(app: AppHandle, state: State<'_, DownloadState>, name: String, url: String) -> Result<String, String> {
+    let runners_dir = get_app_dir(&app).join("runners");
+    fs::create_dir_all(&runners_dir).map_err(|e| e.to_string())?;
+
+    let runner_dir = runners_dir.join(&name);
+    if runner_dir.exists() {
+        let _ = fs::remove_dir_all(&runner_dir);
+    }
+    fs::create_dir_all(&runner_dir).map_err(|e| e.to_string())?;
+
+    let token = CancellationToken::new();
+    let child_token = token.clone();
+    { *state.token.lock().await = Some(token); }
+
+    let tarball_path = runners_dir.join(format!("{}.tar.xz", name));
+    let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
+
+    if !response.status().is_success() {
+        return Err(format!("Download failed: {}", response.status()));
+    }
+
+    let total_size = response.content_length().unwrap_or(0) as f64;
+    let mut file = fs::File::create(&tarball_path).map_err(|e| e.to_string())?;
+    let mut downloaded = 0.0;
+    let mut stream = response.bytes_stream();
+
+    while let Some(chunk) = stream.next().await {
+        if child_token.is_cancelled() {
+            drop(file);
+            let _ = fs::remove_file(&tarball_path);
+            let _ = fs::remove_dir_all(&runner_dir);
+            return Err("CANCELLED".into());
+        }
+        let chunk = chunk.map_err(|e| e.to_string())?;
+        file.write_all(&chunk).map_err(|e| e.to_string())?;
+        downloaded += chunk.len() as f64;
+        if total_size > 0.0 {
+            let _ = app.emit("runner-download-progress", downloaded / total_size * 100.0);
+        }
+    }
+
+    drop(file);
+    { *state.token.lock().await = None; }
+
+    let status = Command::new("tar")
+        .args(["-xf", tarball_path.to_str().unwrap(), "-C", runner_dir.to_str().unwrap(), "--strip-components=1"])
+        .status()
+        .map_err(|e| e.to_string())?;
+
+    let _ = fs::remove_file(&tarball_path);
+
+    if !status.success() {
+        let _ = fs::remove_dir_all(&runner_dir);
+        return Err("Extraction failed".into());
+    }
+
+    Ok(name)
 }
 
 #[tauri::command]
@@ -315,7 +404,7 @@ async fn launch_game(app: AppHandle, instanceId: String) -> Result<(), String> {
     #[cfg(target_os = "linux")]
     {
         if let Some(runner_id) = config.linux_runner {
-            let runners = get_available_runners();
+            let runners = get_available_runners(app.clone());
             if let Some(runner) = runners.into_iter().find(|r| r.id == runner_id) {
                 let mut cmd = if runner.r#type == "proton" {
                     let proton_exe = PathBuf::from(&runner.path).join("proton");
@@ -353,7 +442,7 @@ pub fn run() {
         .plugin(tauri_plugin_gamepad::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_drpc::init())
-        .invoke_handler(tauri::generate_handler![launch_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme])
+        .invoke_handler(tauri::generate_handler![launch_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme, download_runner])
         .run(tauri::generate_context!())
         .expect("error");
 }

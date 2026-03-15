@@ -118,17 +118,17 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
               <p>Upload a skin to get started!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-2">
               {skinLibrary.map((item) => (
                 <div
                   key={item.id}
-                  className={`relative group bg-[#2a2a2a] border-[var(--border-width)] transition-all duration-150 rounded-[var(--radius-base)] overflow-hidden ${skinBase64 === item.skinBase64
+                  className={`relative group bg-[#2a2a2a] border-[var(--border-width)] transition-all duration-150 rounded-[var(--radius-base)] ${skinBase64 === item.skinBase64
                     ? "border-[var(--accent-primary)] shadow-[0_0_15px_rgba(16,185,129,0.3)]"
                     : "border-[var(--border-primary)] hover:border-[var(--border-secondary)] shadow-[inset_calc(4px*var(--shadow-intensity))_calc(4px*var(--shadow-intensity))_#444]"
-                    }`}
+                    } focus-within:ring-4 focus-within:ring-[var(--accent-primary)] focus-within:z-50`}
                 >
-                  <div
-                    className="h-48 cursor-pointer relative"
+                  <button
+                    className="h-48 w-full cursor-pointer relative block focus:outline-white focus:outline-offset-[-4px]"
                     onClick={() => {
                       playSfx("wood click.wav");
                       onSelectSkin(item.skinBase64);
@@ -141,12 +141,12 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
                       </div>
                     )}
                     {gamepadConnected && (
-                      <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/50 px-2 py-1 rounded scale-75 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/50 px-2 py-1 rounded scale-75 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                         <img src="/images/ButtonA.png" className="w-4 h-4" alt="A" />
                         <span className="text-[10px] font-bold">SELECT</span>
                       </div>
                     )}
-                  </div>
+                  </button>
 
                   <div className="p-3 bg-black/60 border-t-[var(--border-width)] border-[var(--border-primary)] flex items-center justify-between gap-2">
                     {editingId === item.id ? (
@@ -158,7 +158,7 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
                           onChange={(e) => setEditName(e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && saveRename()}
                           onBlur={saveRename}
-                          className="flex-1 bg-black border-2 border-slate-700 text-sm px-2 py-1 outline-none"
+                          className="flex-1 bg-black border-2 border-[var(--accent-primary)] text-sm px-2 py-1 outline-none"
                         />
                       </div>
                     ) : (
@@ -166,17 +166,17 @@ export const SkinsView: React.FC<SkinsViewProps> = ({
                         <span className="text-sm truncate legacy-text-shadow flex-1">
                           {item.name}
                         </span>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className={`flex gap-1 transition-opacity ${gamepadConnected ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"}`}>
                           <button
                             onClick={(e) => { e.stopPropagation(); startRename(item); }}
-                            className="p-1 hover:text-emerald-400"
+                            className="p-1 hover:text-emerald-400 focus:text-emerald-400 focus:outline-[var(--accent-primary)] focus:outline-2 focus:scale-110 outline-none"
                             title="Rename"
                           >
                             <Icons.Edit />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); playSfx("pop.wav"); onDeleteSkin(item.id); }}
-                            className="p-1 hover:text-red-500"
+                            className="p-1 hover:text-red-500 focus:text-red-500 focus:outline-red-500 focus:outline-2 focus:scale-110 outline-none"
                             title="Delete"
                           >
                             <Icons.Trash />

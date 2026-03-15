@@ -242,6 +242,7 @@ export default function App() {
                 selectedRunner={selectedRunner}
                 setSelectedRunner={setSelectedRunner}
                 availableRunners={availableRunners}
+                setAvailableRunners={setAvailableRunners}
                 musicVol={musicVol}
                 setMusicVol={setMusicVol}
                 sfxVol={sfxVol}
