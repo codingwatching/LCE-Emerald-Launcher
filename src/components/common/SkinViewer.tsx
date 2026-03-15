@@ -50,7 +50,9 @@ export function SkinViewer({ skinUrl }: SkinViewerProps) {
         return new THREE.MeshLambertMaterial({ map: matTex, transparent: true, alphaTest: 0.5, side: THREE.FrontSide });
       };
 
-      const createPart = (w: number, h: number, d: number, uv: any) => {
+      const createPart = (w: number, h: number, d: number, uv: any, overlayUv?: any) => {
+        const group = new THREE.Group();
+
         const geo = new THREE.BoxGeometry(w, h, d);
         const mats = [
           createFaceMaterial(uv.left[0], uv.left[1], uv.left[2], uv.left[3]),
@@ -60,21 +62,57 @@ export function SkinViewer({ skinUrl }: SkinViewerProps) {
           createFaceMaterial(uv.front[0], uv.front[1], uv.front[2], uv.front[3]),
           createFaceMaterial(uv.back[0], uv.back[1], uv.back[2], uv.back[3])
         ];
-        return new THREE.Mesh(geo, mats);
+        const mesh = new THREE.Mesh(geo, mats);
+        group.add(mesh);
+
+        if (overlayUv) {
+          const oGeo = new THREE.BoxGeometry(w + 0.5, h + 0.5, d + 0.5);
+          const oMats = [
+            createFaceMaterial(overlayUv.left[0], overlayUv.left[1], overlayUv.left[2], overlayUv.left[3]),
+            createFaceMaterial(overlayUv.right[0], overlayUv.right[1], overlayUv.right[2], overlayUv.right[3]),
+            createFaceMaterial(overlayUv.top[0], overlayUv.top[1], overlayUv.top[2], overlayUv.top[3]),
+            createFaceMaterial(overlayUv.bottom[0], overlayUv.bottom[1], overlayUv.bottom[2], overlayUv.bottom[3]),
+            createFaceMaterial(overlayUv.front[0], overlayUv.front[1], overlayUv.front[2], overlayUv.front[3]),
+            createFaceMaterial(overlayUv.back[0], overlayUv.back[1], overlayUv.back[2], overlayUv.back[3])
+          ];
+          const oMesh = new THREE.Mesh(oGeo, oMats);
+          group.add(oMesh);
+        }
+
+        return group;
       };
 
-      const head = createPart(8, 8, 8, { top: [8, 0, 8, 8], bottom: [16, 0, 8, 8], right: [0, 8, 8, 8], left: [16, 8, 8, 8], front: [8, 8, 8, 8], back: [24, 8, 8, 8] });
+      const limbUv = (x: number, y: number) => ({
+        top: [x + 4, y, 4, 4], bottom: [x + 8, y, 4, 4],
+        right: [x, y + 4, 4, 12], front: [x + 4, y + 4, 4, 12],
+        left: [x + 8, y + 4, 4, 12], back: [x + 12, y + 4, 4, 12]
+      });
+
+      const headUv = { top: [8, 0, 8, 8], bottom: [16, 0, 8, 8], right: [0, 8, 8, 8], left: [16, 8, 8, 8], front: [8, 8, 8, 8], back: [24, 8, 8, 8] };
+      const hatUv = { top: [40, 0, 8, 8], bottom: [48, 0, 8, 8], right: [32, 8, 8, 8], left: [48, 8, 8, 8], front: [40, 8, 8, 8], back: [56, 8, 8, 8] };
+      const head = createPart(8, 8, 8, headUv, hatUv);
       head.position.y = 10;
       playerGroup.add(head);
 
-      playerGroup.add(createPart(8, 12, 4, { top: [20, 16, 8, 4], bottom: [28, 16, 8, 4], right: [16, 20, 4, 12], left: [28, 20, 4, 12], front: [20, 20, 8, 12], back: [32, 20, 8, 12] }));
+      const bodyUv = { top: [20, 16, 8, 4], bottom: [28, 16, 8, 4], right: [16, 20, 4, 12], left: [28, 20, 4, 12], front: [20, 20, 8, 12], back: [32, 20, 8, 12] };
+      const jacketUv = { top: [20, 32, 8, 4], bottom: [28, 32, 8, 4], right: [16, 36, 4, 12], left: [28, 36, 4, 12], front: [20, 36, 8, 12], back: [32, 36, 8, 12] };
+      playerGroup.add(createPart(8, 12, 4, bodyUv, isLegacy ? undefined : jacketUv));
 
-      const limbUv = (x: number, y: number) => ({ top: [x + 4, y, 4, 4], bottom: [x + 8, y, 4, 4], right: [x, y + 4, 4, 12], front: [x + 4, y + 4, 4, 12], left: [x + 8, y + 4, 4, 12], back: [x + 12, y + 4, 4, 12] });
+      const rightArm = createPart(4, 12, 4, limbUv(40, 16), isLegacy ? undefined : limbUv(40, 32));
+      rightArm.position.set(-6, 0, 0);
+      playerGroup.add(rightArm);
 
-      const rightArm = createPart(4, 12, 4, limbUv(40, 16)); rightArm.position.set(-6, 0, 0); playerGroup.add(rightArm);
-      const leftArm = createPart(4, 12, 4, isLegacy ? limbUv(40, 16) : limbUv(32, 48)); leftArm.position.set(6, 0, 0); playerGroup.add(leftArm);
-      const rightLeg = createPart(4, 12, 4, limbUv(0, 16)); rightLeg.position.set(-2, -12, 0); playerGroup.add(rightLeg);
-      const leftLeg = createPart(4, 12, 4, isLegacy ? limbUv(0, 16) : limbUv(16, 48)); leftLeg.position.set(2, -12, 0); playerGroup.add(leftLeg);
+      const leftArm = createPart(4, 12, 4, isLegacy ? limbUv(40, 16) : limbUv(32, 48), isLegacy ? undefined : limbUv(48, 48));
+      leftArm.position.set(6, 0, 0);
+      playerGroup.add(leftArm);
+
+      const rightLeg = createPart(4, 12, 4, limbUv(0, 16), isLegacy ? undefined : limbUv(0, 32));
+      rightLeg.position.set(-2, -12, 0);
+      playerGroup.add(rightLeg);
+
+      const leftLeg = createPart(4, 12, 4, isLegacy ? limbUv(0, 16) : limbUv(16, 48), isLegacy ? undefined : limbUv(0, 48));
+      leftLeg.position.set(2, -12, 0);
+      playerGroup.add(leftLeg);
 
       playerGroup.rotation.y = -0.3;
     };

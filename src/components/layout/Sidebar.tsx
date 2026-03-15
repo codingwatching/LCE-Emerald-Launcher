@@ -34,6 +34,7 @@ export const Sidebar: React.FC<SidebarProps> = (props) => {
   const navItems = [
     { id: "home", label: "HOME" },
     { id: "versions", label: "VERSIONS" },
+    { id: "skins", label: "SKINS" },
     { id: "settings", label: "SETTINGS" }
   ];
 

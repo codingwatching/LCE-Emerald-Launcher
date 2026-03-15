@@ -100,7 +100,7 @@ export const HomeView: React.FC<HomeViewProps> = (props) => {
             </div>
 
             <button
-              onClick={() => { playSfx("click.wav"); setActiveTab("settings"); }}
+              onClick={() => { playSfx("click.wav"); setActiveTab("skins"); }}
               onMouseEnter={() => playSfx("hover")}
               className="mt-6 group relative flex items-center justify-center w-[200px] h-[42px] transition-transform duration-100 bg-[url('/images/button.png')] hover:bg-[url('/images/button_highlighted.png')] hover:scale-105 shadow-2xl bg-[length:100%_100%] bg-center bg-no-repeat z-30"
             >

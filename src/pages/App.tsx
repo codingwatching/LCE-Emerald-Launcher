@@ -14,13 +14,14 @@ import { getVersionById } from "@/services/versions";
 import RPC from "@/services/RPC";
 
 // Types
-import { AppConfig, Runner, ReinstallModalData, McNotification } from "@/types/index";
+import { AppConfig, Runner, ReinstallModalData, McNotification, SkinLibraryItem } from "@/types/index";
 
 // Components
 import { Sidebar } from "@/components/layout/Sidebar";
 import { HomeView } from "@/components/views/HomeView";
 import { VersionsView } from "@/components/views/VersionsView";
 import { SettingsView } from "@/components/views/SettingsView";
+import { SkinsView } from "@/components/views/SkinsView";
 import { FirstRunView } from "@/components/views/FirstRunView";
 import { ReinstallModal } from "@/components/modals/ReinstallModal";
 import { TeamModal } from "@/components/modals/TeamModal";
@@ -41,6 +42,7 @@ export default function App() {
   const [isLinux, setIsLinux] = useState(false);
   const [teamModalVisible, setTeamModalVisible] = useState(false);
   const [skinBase64, setSkinBase64] = useState<string | undefined>(undefined);
+  const [skinLibrary, setSkinLibrary] = useState<SkinLibraryItem[]>([]);
 
   const {
     musicVol, setMusicVol,
@@ -69,6 +71,10 @@ export default function App() {
 
       if (config.skinBase64) {
         setSkinBase64(config.skinBase64);
+      }
+
+      if (config.skinLibrary) {
+        setSkinLibrary(config.skinLibrary);
       }
 
       const platform = window.navigator.platform.toLowerCase();
@@ -108,6 +114,44 @@ export default function App() {
 
     updateRPC();
   }, [username, isRunning, selectedInstance, activeTab, isFirstRun]);
+
+  const saveFullConfig = (overrides: Partial<AppConfig> = {}) => {
+    const config: AppConfig = {
+      username: overrides.username !== undefined ? overrides.username : username,
+      linuxRunner: (overrides.linuxRunner !== undefined ? overrides.linuxRunner : selectedRunner) || undefined,
+      skinBase64: overrides.skinBase64 !== undefined ? overrides.skinBase64 : skinBase64,
+      skinLibrary: overrides.skinLibrary !== undefined ? overrides.skinLibrary : skinLibrary,
+    };
+    TauriService.saveConfig(config);
+  };
+
+  const addSkinToLibrary = (name: string, base64: string) => {
+    const newItem: SkinLibraryItem = {
+      id: crypto.randomUUID(),
+      name,
+      skinBase64: base64
+    };
+    const newLibrary = [...skinLibrary, newItem];
+    setSkinLibrary(newLibrary);
+    saveFullConfig({ skinLibrary: newLibrary });
+  };
+
+  const renameSkinInLibrary = (id: string, newName: string) => {
+    const newLibrary = skinLibrary.map(item => item.id === id ? { ...item, name: newName } : item);
+    setSkinLibrary(newLibrary);
+    saveFullConfig({ skinLibrary: newLibrary });
+  };
+
+  const deleteSkinFromLibrary = (id: string) => {
+    const newLibrary = skinLibrary.filter(item => item.id !== id);
+    setSkinLibrary(newLibrary);
+    saveFullConfig({ skinLibrary: newLibrary });
+  };
+
+  const selectSkin = (base64: string) => {
+    setSkinBase64(base64);
+    saveFullConfig({ skinBase64: base64 });
+  };
 
   if (isFirstRun) {
     return (
@@ -171,6 +215,19 @@ export default function App() {
             />
           )}
 
+          {activeTab === "skins" && (
+            <SkinsView
+              skinBase64={skinBase64}
+              skinLibrary={skinLibrary}
+              playSfx={playSfx}
+              onSelectSkin={selectSkin}
+              onAddSkin={addSkinToLibrary}
+              onRenameSkin={renameSkinInLibrary}
+              onDeleteSkin={deleteSkinFromLibrary}
+              gamepadConnected={gamepadConnected}
+            />
+          )}
+
           {activeTab === "settings" && (
             <SettingsView
               username={username}
@@ -189,8 +246,6 @@ export default function App() {
               setShowClickParticles={setShowClickParticles}
               playSfx={playSfx}
               showTeamModal={() => setTeamModalVisible(true)}
-              skinBase64={skinBase64}
-              setSkinBase64={setSkinBase64}
               showPanorama={showPanorama}
               setShowPanorama={setShowPanorama}
             />

@@ -12,10 +12,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
+pub struct SkinLibraryItem {
+    pub id: String,
+    pub name: String,
+    pub skin_base64: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct AppConfig {
     pub username: String,
     pub linux_runner: Option<String>,
     pub skin_base64: Option<String>,
+    pub skin_library: Option<Vec<SkinLibraryItem>>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -58,7 +67,7 @@ fn load_config(app: AppHandle) -> AppConfig {
     
     let old_path = get_app_dir(&app).join("emerald_legacy_config.txt");
     let username = fs::read_to_string(old_path).unwrap_or_else(|_| "Player".into());
-    AppConfig { username, linux_runner: None, skin_base64: None }
+    AppConfig { username, linux_runner: None, skin_base64: None, skin_library: None }
 }
 
 #[tauri::command]
