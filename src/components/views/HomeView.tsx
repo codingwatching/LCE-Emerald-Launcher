@@ -14,6 +14,7 @@ interface HomeViewProps {
   isRunning: boolean;
   installingInstance: string | null;
   fadeAndLaunch: () => void;
+  stopGame: () => void;
   playSfx: (name: string, multiplier?: number) => void;
   setActiveTab: (tab: string) => void;
   skinBase64?: string;
@@ -42,6 +43,7 @@ export const HomeView: React.FC<HomeViewProps> = (props) => {
     isRunning,
     installingInstance,
     fadeAndLaunch,
+    stopGame,
     playSfx,
     setActiveTab,
     skinBase64,
@@ -127,18 +129,20 @@ export const HomeView: React.FC<HomeViewProps> = (props) => {
               </select>
 
               <button
-                onClick={fadeAndLaunch}
-                disabled={isLocked}
+                onClick={isRunning ? stopGame : fadeAndLaunch}
+                disabled={!!installingInstance}
                 onMouseEnter={() => playSfx("hover")}
-                className={`h-20 text-4xl transition-all legacy-btn flex items-center justify-center gap-4 ${isLocked
+                className={`h-20 text-4xl transition-all legacy-btn flex items-center justify-center gap-4 ${!!installingInstance
                   ? "opacity-50 grayscale cursor-default"
-                  : "hover:scale-[1.02] active:scale-95 cursor-pointer"
+                  : isRunning 
+                    ? "hover:scale-[1.02] active:scale-95 cursor-pointer bg-red-900/40 border-red-500/50" 
+                    : "hover:scale-[1.02] active:scale-95 cursor-pointer"
                   }`}
               >
                 {gamepadConnected && !isLocked && (
                   <img src="/images/ButtonA.png" className="w-10 h-10 animate-pulse" alt="A" />
                 )}
-                <span>{installingInstance ? "INSTALLING..." : isRunning ? "RUNNING..." : "PLAY"}</span>
+                <span>{installingInstance ? "INSTALLING..." : isRunning ? "STOP" : "PLAY"}</span>
               </button>
             </div>
           ) : (

@@ -47,8 +47,17 @@ export const useLauncher = (
     }, 1500);
   };
 
+  const stopGame = async () => {
+    try {
+      await TauriService.stopGame();
+    } catch (e) {
+      console.error("Failed to stop game:", e);
+    }
+  };
+
   return {
     isRunning,
     fadeAndLaunch,
+    stopGame,
   };
 };

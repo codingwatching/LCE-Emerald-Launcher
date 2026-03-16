@@ -78,6 +78,10 @@ export const useGamepad = (
   };
 
   const update = () => {
+    if (!document.hasFocus()) {
+      requestRef.current = requestAnimationFrame(update);
+      return;
+    }
     const gamepads = navigator.getGamepads();
     let anyConnected = false;
     for (const gp of gamepads) {

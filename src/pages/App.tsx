@@ -59,7 +59,7 @@ export default function App() {
   } = useSettings();
   const { musicRef, playRandomMusic, playSfx, ensureAudio } = useAudio(musicVol, sfxVol, isMuted);
   const { installedStatus, installingInstance, downloadProgress, executeInstall, updateAllStatus } = useGameInstances(playSfx, setMcNotif);
-  const { isRunning, fadeAndLaunch } = useLauncher(selectedInstance, musicRef, isMuted, musicVol, playRandomMusic, playSfx);
+  const { isRunning, fadeAndLaunch, stopGame } = useLauncher(selectedInstance, musicRef, isMuted, musicVol, playRandomMusic, playSfx);
   const { connected: gamepadConnected } = useGamepad(activeTab, setActiveTab, playSfx);
   useEffect(() => {
     const initApp = async () => {
@@ -215,6 +215,7 @@ export default function App() {
                 isRunning={isRunning}
                 installingInstance={installingInstance}
                 fadeAndLaunch={fadeAndLaunch}
+                stopGame={stopGame}
                 playSfx={playSfx}
                 setActiveTab={setActiveTab}
                 skinBase64={skinBase64}

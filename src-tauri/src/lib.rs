@@ -1,7 +1,11 @@
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
-use std::process::{Command, Stdio};
+use std::process::Command;
+
+#[cfg(target_os = "macos")]
+use std::process::Stdio;
+
 use tauri::{AppHandle, Emitter, State, Manager};
 use futures_util::StreamExt;
 use std::sync::Arc;
@@ -53,9 +57,11 @@ pub struct Runner {
 }
 
 pub struct DownloadState { pub token: Arc<Mutex<Option<CancellationToken>>> }
+pub struct GameState { pub child: Arc<Mutex<Option<tokio::process::Child>>> }
 
 #[derive(Serialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
+#[cfg(target_os = "macos")]
 struct MacosSetupProgressPayload {
     stage: String,
     message: String,
@@ -82,6 +88,7 @@ fn get_macos_runtime_dir(app: &AppHandle) -> PathBuf {
         .join("runtime")
 }
 
+#[cfg(target_os = "macos")]
 fn emit_macos_setup_progress(window: &tauri::Window, stage: &str, message: String, percent: Option<f64>) {
     let _ = window.emit(
         "macos-setup-progress",
@@ -93,6 +100,7 @@ fn emit_macos_setup_progress(window: &tauri::Window, stage: &str, message: Strin
     );
 }
 
+#[cfg(target_os = "macos")]
 fn find_executable_recursive(root: &PathBuf, file_name: &str) -> Option<PathBuf> {
     let entries = fs::read_dir(root).ok()?;
     for entry in entries.flatten() {
@@ -739,7 +747,7 @@ fn ensure_server_list(instance_dir: &PathBuf, servers: Vec<McServer>) {
 
 #[tauri::command]
 #[allow(non_snake_case)]
-async fn launch_game(app: AppHandle, instanceId: String, servers: Vec<McServer>) -> Result<(), String> {
+async fn launch_game(app: AppHandle, state: State<'_, GameState>, instanceId: String, servers: Vec<McServer>) -> Result<(), String> {
     let root = get_app_dir(&app);
     let instance_dir = root.join("instances").join(&instanceId);
     let config = load_config(app.clone());
@@ -768,7 +776,7 @@ async fn launch_game(app: AppHandle, instanceId: String, servers: Vec<McServer>)
             if let Some(runner) = runners.into_iter().find(|r| r.id == runner_id) {
                 let mut cmd = if runner.r#type == "proton" {
                     let proton_exe = PathBuf::from(&runner.path).join("proton");
-                    let mut c = Command::new(proton_exe);
+                    let mut c = tokio::process::Command::new(proton_exe);
                     let compat_data = instance_dir.join("proton_prefix");
                     fs::create_dir_all(&compat_data).map_err(|e| e.to_string())?;
                     c.env("STEAM_COMPAT_CLIENT_INSTALL_PATH", "");
@@ -776,14 +784,38 @@ async fn launch_game(app: AppHandle, instanceId: String, servers: Vec<McServer>)
                     c.arg("run");
                     c
                 } else {
-                    Command::new(runner.path)
+                    tokio::process::Command::new(runner.path)
                 };
 
                 cmd.arg(&game_exe)
-                   .current_dir(&instance_dir)
-                   .spawn()
-                   .map_err(|e| e.to_string())?;
-                return Ok(());
+                   .current_dir(&instance_dir);
+                
+                let child = cmd.spawn().map_err(|e| e.to_string())?;
+                {
+                    let mut lock = state.child.lock().await;
+                    *lock = Some(child);
+                }
+
+                let status = loop {
+                    {
+                        let mut lock = state.child.lock().await;
+                        if let Some(ref mut c) = *lock {
+                            if let Some(s) = c.try_wait().map_err(|e| e.to_string())? {
+                                break s;
+                            }
+                        } else {
+                            return Ok(());
+                        }
+                    }
+                    tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+                };
+
+                {
+                    let mut lock = state.child.lock().await;
+                    *lock = None;
+                }
+
+                return if status.success() || status.code() == Some(253) || status.code() == Some(96) { Ok(()) } else { Err(format!("Game exited with status: {}", status)) };
             }
         }
         Err("No Linux runner selected in settings.".into())
@@ -815,12 +847,12 @@ async fn launch_game(app: AppHandle, instanceId: String, servers: Vec<McServer>)
 
             let mut cmd = if let Some(wrapper) = gptk_no_hud {
                 let win_path = unix_path_to_wine_z_path(&game_exe);
-                let mut c = Command::new(wrapper);
+                let mut c = tokio::process::Command::new(wrapper);
                 c.arg(&prefix_dir);
                 c.arg(win_path);
                 c
             } else {
-                let mut c = Command::new(&wine_binary);
+                let mut c = tokio::process::Command::new(&wine_binary);
                 c.env("WINEPREFIX", &prefix_dir);
                 c.arg(&game_exe);
                 c
@@ -858,25 +890,82 @@ async fn launch_game(app: AppHandle, instanceId: String, servers: Vec<McServer>)
                 .stdout(Stdio::null())
                 .stderr(Stdio::null());
 
-            cmd.spawn().map_err(|e| e.to_string())?;
-            Ok(())
+            let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+            {
+                let mut lock = state.child.lock().await;
+                *lock = Some(child);
+            }
+
+            let status = loop {
+                {
+                    let mut lock = state.child.lock().await;
+                    if let Some(ref mut c) = *lock {
+                        if let Some(s) = c.try_wait().map_err(|e| e.to_string())? {
+                            break s;
+                        }
+                    } else {
+                        return Ok(());
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            };
+
+            {
+                let mut lock = state.child.lock().await;
+                *lock = None;
+            }
+
+            return if status.success() || status.code() == Some(253) || status.code() == Some(96) { Ok(()) } else { Err(format!("Game exited with status: {}", status)) };
         }
 
         #[cfg(all(not(target_os = "macos"), not(target_os = "linux")))]
         {
-            let _ = Command::new(&game_exe).spawn().map_err(|e| e.to_string())?;
-            Ok(())
+            let mut cmd = tokio::process::Command::new(&game_exe);
+            cmd.current_dir(&instance_dir);
+            let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+            {
+                let mut lock = state.child.lock().await;
+                *lock = Some(child);
+            }
+            let status = loop {
+                {
+                    let mut lock = state.child.lock().await;
+                    if let Some(ref mut c) = *lock {
+                        if let Some(s) = c.try_wait().map_err(|e| e.to_string())? {
+                            break s;
+                        }
+                    } else {
+                        return Ok(());
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
+            };
+            {
+                let mut lock = state.child.lock().await;
+                *lock = None;
+            }
+            return if status.success() || status.code() == Some(253) || status.code() == Some(96) { Ok(()) } else { Err(format!("Game exited with status: {}", status)) };
         }
     }
+}
+
+#[tauri::command]
+async fn stop_game(state: State<'_, GameState>) -> Result<(), String> {
+    let mut lock = state.child.lock().await;
+    if let Some(mut child) = lock.take() {
+        let _ = child.kill().await;
+    }
+    Ok(())
 }
 
 pub fn run() {
     tauri::Builder::default()
         .manage(DownloadState { token: Arc::new(Mutex::new(None)) })
+        .manage(GameState { child: Arc::new(Mutex::new(None)) })
         .plugin(tauri_plugin_gamepad::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_drpc::init())
-        .invoke_handler(tauri::generate_handler![setup_macos_runtime, launch_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme, download_runner])
+        .invoke_handler(tauri::generate_handler![setup_macos_runtime, launch_game, stop_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme, download_runner])
         .run(tauri::generate_context!())
         .expect("error");
 }
