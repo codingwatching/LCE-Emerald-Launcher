@@ -8,6 +8,8 @@ import { GAME_VERSIONS } from "@/services/versions";
 // Types
 import { InstalledStatus, McNotification } from "@/types/index";
 
+// leonardo: use this for game installs/launches
+// returns: installedStatus, installingInstance, downloadProgress, isGameRunning, executeInstall, launchGame, stopGame, updateAllStatus
 export const useGameInstances = (
   playSfx: (name: string, multiplier?: number) => void,
   setMcNotif: (notif: McNotification | null) => void

@@ -1,9 +1,8 @@
 import { useState } from "react";
-
-// Services
 import { TauriService } from "@/services/tauri";
-import { PARTNER_SERVERS } from "@/services/versions";
 
+// leonardo: use this for launch button with music fade
+// returns: isRunning, fadeAndLaunch, stopGame
 export const useLauncher = (
   selectedInstance: string,
   musicRef: React.RefObject<HTMLAudioElement | null>,
@@ -34,7 +33,7 @@ export const useLauncher = (
     }
     setTimeout(async () => {
       try {
-        await TauriService.launchGame(selectedInstance, PARTNER_SERVERS);
+        await TauriService.launchGame(selectedInstance, []);
       } catch (e) {
         alert(`Failed to launch game: ${e}`);
       } finally {

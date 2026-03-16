@@ -3,6 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 // Types
 import { AppConfig, Runner, ThemePalette, McServer } from "@/types/index";
 
+// leonardo: use this to call rust backend functions
 export const TauriService = {
   loadConfig: () => invoke<AppConfig>("load_config"),
   saveConfig: (config: AppConfig) => invoke("save_config", { config }),

@@ -3,6 +3,8 @@ import { useRef, useEffect } from "react";
 // Services
 import { playSfx as playSfxService, ensureAudio } from "@/services/audio";
 
+// leonardo: use this for music/sounds
+// returns: musicRef, playRandomMusic, pauseMusic, resumeMusic, playSfx, ensureAudio
 export const useAudio = (musicVol: number, sfxVol: number, isMuted: boolean) => {
   const musicRef = useRef<HTMLAudioElement | null>(null);
   const lastTrack = useRef<number>(0);

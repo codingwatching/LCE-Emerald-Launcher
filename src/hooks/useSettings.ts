@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+// leonardo: use this for user settings (auto-saves to localStorage)
+// returns: musicVol, sfxVol, isMuted, showClickParticles, showPanorama, themeStyleId, themePaletteId, macosCompatReady + setters
 export const useSettings = () => {
   const [musicVol, setMusicVol] = useState(parseFloat(localStorage.getItem("musicVol") || "0.4"));
   const [sfxVol, setSfxVol] = useState(parseFloat(localStorage.getItem("sfxVol") || "0.7"));
