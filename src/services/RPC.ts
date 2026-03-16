@@ -1,9 +1,11 @@
 import { setActivity, start } from "tauri-plugin-drpc";
-import { ActivityType } from "tauri-plugin-drpc/activity";
+import { Activity, ActivityType, Assets, Timestamps, Button } from "tauri-plugin-drpc/activity";
+
 class RPC {
   private startTime: number = Date.now();
   private initializationPromise: Promise<void> | null = null;
   private initialized: boolean = false;
+
   public async StartRPC() {
     if (this.initialized) return;
     if (this.initializationPromise) return this.initializationPromise;
@@ -26,30 +28,27 @@ class RPC {
       if (!this.initialized) return;
     }
 
-    const activityPayload = {
-      details,
-      state,
-      type: ActivityType.Playing,
-      activity_type: ActivityType.Playing,
-      assets: {
-        large_image: "logo",
-        large_text: "Emerald Legacy",
-        small_image: "app-icon",
-        small_text: isPlaying ? "Playing" : "In Menus"
-      },
-      timestamps: {
-        start: this.startTime
-      },
-      buttons: [
-        { label: "Discord", url: "https://discord.gg/RHGRUwpmVc" },
-        { label: "GitHub", url: "https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher" }
-      ]
-    };
+    const activity = new Activity();
+    activity.setDetails(details);
+    activity.setState(state);
+    activity.setActivity(ActivityType.Playing);
+
+    const assets = new Assets();
+    assets.setLargeImage("logo");
+    assets.setLargeText("Emerald Legacy");
+    assets.setSmallImage("app-icon");
+    assets.setSmallText(isPlaying ? "Playing" : "In Menus");
+    activity.setAssets(assets);
+
+    activity.setTimestamps(new Timestamps(this.startTime));
+
+    activity.setButton([
+      new Button("Discord", "https://discord.gg/RHGRUwpmVc"),
+      new Button("GitHub", "https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher")
+    ]);
 
     try {
-      await setActivity({
-        toString: () => JSON.stringify(activityPayload)
-      } as any);
+      await setActivity(activity);
     } catch (e) {
       console.error("Failed to set RPC activity:", e);
     }
