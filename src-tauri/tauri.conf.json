@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Legacy Launcher",
+  "productName": "Emerald Legacy Launcher",
   "version": "1.0.0",
-  "identifier": "com.lce.launcher",
+  "identifier": "com.emerald.legacy",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Emerald Launcher",
+        "title": "Emerald Legacy Launcher",
         "width": 1680,
         "height": 960,
         "minWidth": 1680,
