@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function HomeView({ handleLaunch, setActiveView, playClickSound, setShowCredits, isFocusedSection, onNavigateLeft }: any) {
+export default function HomeView({ 
+  handleLaunch, setActiveView, 
+  playClickSound, setShowCredits, 
+  isFocusedSection, onNavigateLeft,
+  isGameRunning, stopGame
+}: any) {
   const [menuFocus, setMenuFocus] = useState<number | null>(null);
   const buttons = [
-    { label: 'Play Game', action: handleLaunch },
+    { 
+      label: isGameRunning ? 'Stop Game' : 'Play Game', 
+      action: isGameRunning ? stopGame : handleLaunch,
+      isDanger: isGameRunning
+    },
     { label: 'Help & Options', action: () => setActiveView('settings') },
     { label: 'Versions', action: () => setActiveView('versions') },
     { label: 'Marketplace', action: () => setActiveView('marketplace') },
@@ -34,7 +43,7 @@ export default function HomeView({ handleLaunch, setActiveView, playClickSound, 
         <button 
           key={i} onMouseEnter={() => isFocusedSection && setMenuFocus(i)} onMouseLeave={() => setMenuFocus(null)}
           onClick={() => { if (isFocusedSection) { playClickSound(); btn.action(); } }} 
-          className={`w-full h-12 flex items-center justify-center text-2xl mc-text-shadow transition-colors outline-none border-none ${menuFocus === i ? 'text-[#FFFF55]' : 'text-white'}`}
+          className={`w-full h-12 flex items-center justify-center text-2xl mc-text-shadow transition-colors outline-none border-none ${menuFocus === i ? (btn.isDanger ? 'text-red-400' : 'text-[#FFFF55]') : (btn.isDanger ? 'text-red-500' : 'text-white')}`}
           style={{ backgroundImage: menuFocus === i ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
         >
           {btn.label}

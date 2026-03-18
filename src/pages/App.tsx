@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { invoke } from '@tauri-apps/api/core';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import HomeView from '../components/views/HomeView';
 import SettingsView from '../components/views/SettingsView';
@@ -13,6 +12,7 @@ import SkinViewer from '../components/common/SkinViewer';
 import TeamModal from '../components/modals/TeamModal';
 import PanoramaBackground from '../components/common/PanoramaBackground';
 import { useGamepad } from '../hooks/useGamepad';
+import { TauriService } from '../services/TauriService';
 
 const appWindow = getCurrentWindow();
 
@@ -31,8 +31,8 @@ function AppContent() {
   const [showCredits, setShowCredits] = useState(false);
   const [focusSection, setFocusSection] = useState<'menu' | 'skin'>('menu');
 
-  const [profile, setProfile] = useLocalStorage('lce-profile', 'TU75');
-  const [installs, setInstalls] = useLocalStorage<string[]>('lce-installs', []);
+  const [profile, setProfile] = useLocalStorage('lce-profile', 'legacy_evolved');
+  const [installs, setInstalls] = useState<string[]>([]);
   const [isDayTime, setIsDayTime] = useLocalStorage('lce-daytime', true);
   const [vfxEnabled, setVfxEnabled] = useLocalStorage('lce-vfx', true);
   const [musicVol, setMusicVol] = useLocalStorage('lce-music', 50);
@@ -41,6 +41,12 @@ function AppContent() {
   const [layout, setLayout] = useLocalStorage('lce-layout', 'KBM');
   const [username, setUsername] = useLocalStorage('lce-username', 'Steve');
   const [skinUrl, setSkinUrl] = useLocalStorage('lce-skin', '/images/Default.png');
+
+  const [isGameRunning, setIsGameRunning] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [linuxRunner, setLinuxRunner] = useState<string | undefined>();
+  const [perfBoost, setPerfBoost] = useState(false);
 
   const [currentTrack, setCurrentTrack] = useState(0);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
@@ -59,9 +65,9 @@ function AppContent() {
   const [splashIndex, setSplashIndex] = useState(-1);
 
   const editions = [
-    { id: 'TU75', name: 'PLACEHOLDER_TITLE UPDATE', desc: 'TITLE_UPDATE_DESCRIPTION' },
-    { id: 'TU24', name: 'PLACEHOLDER_TITLE UPDATE', desc: 'TITLE_UPDATE_DESCRIPTION' },
-    { id: 'TU19', name: 'PLACEHOLDER_TITLE UPDATE', desc: 'TITLE_UPDATE_DESCRIPTION' }
+    { id: 'legacy_evolved', name: 'Legacy Evolved', desc: 'Backporting the newer title updates back to the TU19 (like TU31)', url: 'https://github.com/piebotc/LegacyEvolved/releases/download/nightly/LCEWindows64.zip' },
+    { id: 'vanilla_tu24', name: 'Title Update 24', desc: 'Based on TU19, but with the features of TU24.', url: 'https://huggingface.co/datasets/KayJann/emerald-legacy-assets/resolve/main/emerald_tu24_vanilla.zip' },
+    { id: 'vanilla_tu19', name: 'Title Update 19', desc: 'Leaked 4J Studios build. (smartcmd)', url: "https://github.com/smartcmd/MinecraftConsoles/releases/download/nightly/LCEWindows64.zip" }
   ];
 
   const tracks = [
@@ -84,8 +90,30 @@ function AppContent() {
     setSplashIndex(newIndex);
   };
 
-  const toggleInstall = (id: string) => {
-    if (!installs.includes(id)) setInstalls([...installs, id]);
+  const checkInstalls = async () => {
+    const results = await Promise.all(editions.map(async (e) => {
+      const isInstalled = await TauriService.checkGameInstalled(e.id);
+      return isInstalled ? e.id : null;
+    }));
+    setInstalls(results.filter((id): id is string => id !== null));
+  };
+
+  const toggleInstall = async (id: string) => {
+    const edition = editions.find(e => e.id === id);
+    if (!edition) return;
+
+    try {
+      setDownloadingId(id);
+      setDownloadProgress(0);
+      await TauriService.downloadAndInstall(edition.url, id);
+      await checkInstalls();
+      setDownloadProgress(null);
+      setDownloadingId(null);
+    } catch (e) {
+      console.error(e);
+      setDownloadProgress(null);
+      setDownloadingId(null);
+    }
   };
 
   const { connected } = useGamepad({
@@ -96,6 +124,22 @@ function AppContent() {
     appWindow.show();
     setTimeout(() => setShowIntro(false), 2800);
     setTimeout(() => setLogoAnimDone(true), 3400);
+
+    TauriService.loadConfig().then(config => {
+      if (config.username) setUsername(config.username);
+      if (config.skinBase64) setSkinUrl(config.skinBase64);
+      if (config.themeStyleId) setTheme(config.themeStyleId);
+      if (config.linuxRunner) setLinuxRunner(config.linuxRunner);
+      if (config.appleSiliconPerformanceBoost !== undefined) setPerfBoost(config.appleSiliconPerformanceBoost);
+    });
+
+    checkInstalls();
+
+    const unlistenDownload = TauriService.onDownloadProgress(p => setDownloadProgress(p));
+
+    return () => {
+      unlistenDownload.then(u => u());
+    };
   }, []);
 
   useEffect(() => {
@@ -119,8 +163,14 @@ function AppContent() {
   useEffect(() => { if (audioElement) audioElement.volume = musicVol / 100; }, [musicVol, audioElement]);
 
   useEffect(() => {
-    invoke('save_config', { config: { username, skinBase64: skinUrl, themeStyleId: theme } }).catch(() => { });
-  }, [username, skinUrl, theme, musicVol, sfxVol, vfxEnabled]);
+    TauriService.saveConfig({
+      username,
+      skinBase64: skinUrl,
+      themeStyleId: theme,
+      linuxRunner,
+      appleSiliconPerformanceBoost: perfBoost
+    }).catch(() => { });
+  }, [username, skinUrl, theme, linuxRunner, perfBoost]);
 
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -130,7 +180,26 @@ function AppContent() {
 
   const uiFade = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.3 } };
 
-  const handleLaunch = () => console.log(`Preparing to launch profile: ${profile}`);
+  const handleLaunch = async () => {
+    if (isGameRunning) return;
+    setIsGameRunning(true);
+    try {
+      await TauriService.launchGame(profile, []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGameRunning(false);
+    }
+  };
+
+  const stopGame = async () => {
+    try {
+      await TauriService.stopGame();
+      setIsGameRunning(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <div data-tauri-drag-region className="w-screen h-screen overflow-hidden select-none flex flex-col relative bg-black text-white font-['Mojangles'] outline-none focus:outline-none">
@@ -149,6 +218,32 @@ function AppContent() {
 
       <AnimatePresence>
         {showCredits && <TeamModal isOpen={showCredits} onClose={() => setShowCredits(false)} playClickSound={playClickSound} playBackSound={playBackSound} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {downloadProgress !== null && (
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 50 }}
+            className="absolute top-14 right-8 z-[100] w-64 p-4 shadow-2xl flex flex-col gap-2"
+            style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}
+          >
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-[#FFFF55] mc-text-shadow uppercase tracking-widest font-bold">Downloading</span>
+              <span className="text-xs text-white mc-text-shadow">{Math.floor(downloadProgress)}%</span>
+            </div>
+            <div className="text-[10px] text-gray-300 mc-text-shadow truncate uppercase opacity-80">
+              {editions.find(e => e.id === downloadingId)?.name || 'Game Files'}
+            </div>
+            <div className="w-full h-2 bg-black/40 border border-[#373737] relative overflow-hidden">
+              <div 
+                className="h-full bg-[#FFFF55] transition-all duration-300" 
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -210,9 +305,9 @@ function AppContent() {
               <div className={`w-full h-full flex flex-col items-center justify-center transition-opacity duration-300 ${(!logoAnimDone || isUiHidden) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
 
                 {activeView === 'main' && (
-                  <SkinViewer 
-                    username={username} setUsername={setUsername} 
-                    playClickSound={playClickSound} skinUrl={skinUrl} 
+                  <SkinViewer
+                    username={username} setUsername={setUsername}
+                    playClickSound={playClickSound} skinUrl={skinUrl}
                     setSkinUrl={setSkinUrl} setActiveView={setActiveView}
                     isFocusedSection={focusSection === 'skin'}
                     onNavigateRight={() => setFocusSection('menu')}
@@ -222,14 +317,15 @@ function AppContent() {
                 <div className="w-full max-w-4xl relative flex justify-center items-center">
                   <AnimatePresence>
                     {activeView === 'main' && (
-                      <HomeView 
-                        handleLaunch={handleLaunch} setActiveView={setActiveView} 
-                        playClickSound={playClickSound} setShowCredits={setShowCredits} 
+                      <HomeView
+                        handleLaunch={handleLaunch} setActiveView={setActiveView}
+                        playClickSound={playClickSound} setShowCredits={setShowCredits}
                         isFocusedSection={focusSection === 'menu'}
                         onNavigateLeft={() => setFocusSection('skin')}
+                        isGameRunning={isGameRunning} stopGame={stopGame}
                       />
                     )}
-                    {activeView === 'settings' && <SettingsView vfxEnabled={vfxEnabled} setVfxEnabled={setVfxEnabled} music={musicVol} setMusic={setMusicVol} sfx={sfxVol} setSfx={setSfxVol} layout={layout} setLayout={setLayout} currentTrack={currentTrack} setCurrentTrack={setCurrentTrack} tracks={tracks} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
+                    {activeView === 'settings' && <SettingsView vfxEnabled={vfxEnabled} setVfxEnabled={setVfxEnabled} music={musicVol} setMusic={setMusicVol} sfx={sfxVol} setSfx={setSfxVol} layout={layout} setLayout={setLayout} currentTrack={currentTrack} setCurrentTrack={setCurrentTrack} tracks={tracks} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} linuxRunner={linuxRunner} setLinuxRunner={setLinuxRunner} perfBoost={perfBoost} setPerfBoost={setPerfBoost} />}
                     {activeView === 'versions' && <VersionsView selectedProfile={profile} setSelectedProfile={setProfile} installedVersions={installs} toggleInstall={toggleInstall} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} editions={editions} />}
                     {activeView === 'marketplace' && <MarketplaceView playBackSound={playBackSound} setActiveView={setActiveView} />}
                     {activeView === 'themes' && <ThemesView theme={theme} setTheme={setTheme} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}

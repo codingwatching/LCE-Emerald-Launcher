@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
+import { TauriService } from '../../services/TauriService';
 
-export default function VersionsView({ selectedProfile, setSelectedProfile, installedVersions, toggleInstall, playClickSound, playBackSound, setActiveView, editions }: any) {
+export default function VersionsView({
+  selectedProfile, setSelectedProfile,
+  installedVersions, toggleInstall,
+  playClickSound, playBackSound,
+  setActiveView, editions
+}: any) {
   const [focusRow, setFocusRow] = useState<number>(0);
   const [focusCol, setFocusCol] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,6 +54,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
             toggleInstall(edition.id);
           } else if (focusCol === 2) {
             playClickSound();
+            TauriService.openInstanceFolder(edition.id);
           }
         } else {
           playBackSound();
@@ -68,7 +75,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
     <motion.div ref={containerRef} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center w-full max-w-4xl outline-none">
       <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80 font-bold">Versions</h2>
 
-      <div className="w-full max-w-[740px] h-[380px] overflow-y-auto mb-6 p-6 shadow-2xl relative" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
+      <div className="w-full max-w-[740px] h-[380px] overflow-y-auto mb-6 p-6 relative">
         <div className="flex flex-col gap-3">
           {editions.map((edition: any, i: number) => {
             const isInstalled = installedVersions.includes(edition.id);
@@ -78,7 +85,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
             return (
               <div
                 key={edition.id}
-                className={`w-full flex items-center transition-all border-none outline-none`}
+                className={`w-full flex items-center transition-all border-none outline-none overflow-hidden`}
                 style={{
                   backgroundImage: (isSelected || (isRowFocused && focusCol === 0)) ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')",
                   backgroundSize: "100% 100%",
@@ -89,7 +96,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
                   data-row={i} data-col={0} tabIndex={0}
                   onMouseEnter={() => { setFocusRow(i); setFocusCol(0); }}
                   onClick={() => { if (isInstalled) { playClickSound(); setSelectedProfile(edition.id); } else { toggleInstall(edition.id); } }}
-                  className="flex-1 p-4 flex items-center cursor-pointer outline-none pl-6 text-left"
+                  className="flex-1 p-4 flex items-center cursor-pointer outline-none pl-6 text-left relative"
                 >
                   <div className="flex flex-col">
                     <div className="flex items-center gap-3">
@@ -115,7 +122,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
                       <button
                         data-row={i} data-col={1}
                         onMouseEnter={() => { setFocusRow(i); setFocusCol(1); }}
-                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                        onClick={(e) => { e.stopPropagation(); playClickSound(); toggleInstall(edition.id); }}
                         className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
                         style={{ backgroundImage: (isRowFocused && focusCol === 1) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                       >
@@ -124,7 +131,7 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
                       <button
                         data-row={i} data-col={2}
                         onMouseEnter={() => { setFocusRow(i); setFocusCol(2); }}
-                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                        onClick={(e) => { e.stopPropagation(); playClickSound(); TauriService.openInstanceFolder(edition.id); }}
                         className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
                         style={{ backgroundImage: (isRowFocused && focusCol === 2) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                       >
