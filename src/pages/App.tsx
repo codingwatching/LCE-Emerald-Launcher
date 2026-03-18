@@ -13,9 +13,8 @@ import TeamModal from '../components/modals/TeamModal';
 import PanoramaBackground from '../components/common/PanoramaBackground';
 import { useGamepad } from '../hooks/useGamepad';
 import { TauriService } from '../services/TauriService';
-
+import RpcService from '../services/RpcService';
 const appWindow = getCurrentWindow();
-
 export default function App() {
   return (
     <AppContent />
@@ -30,7 +29,6 @@ function AppContent() {
   const [isUiHidden, setIsUiHidden] = useState(false);
   const [showCredits, setShowCredits] = useState(false);
   const [focusSection, setFocusSection] = useState<'menu' | 'skin'>('menu');
-
   const [profile, setProfile] = useLocalStorage('lce-profile', 'legacy_evolved');
   const [installs, setInstalls] = useState<string[]>([]);
   const [isDayTime, setIsDayTime] = useLocalStorage('lce-daytime', true);
@@ -42,16 +40,13 @@ function AppContent() {
   const [username, setUsername] = useLocalStorage('lce-username', 'Steve');
   const [skinUrl, setSkinUrl] = useLocalStorage('lce-skin', '/images/Default.png');
   const [skinBase64, setSkinBase64] = useState<string | null>(null);
-
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [linuxRunner, setLinuxRunner] = useState<string | undefined>();
   const [perfBoost, setPerfBoost] = useState(false);
-
   const [currentTrack, setCurrentTrack] = useState(0);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-
   const splashes = [
     "Legacy is back!", "Pixelated goodness!", "Console Edition vibe!", "100% Not Microsoft!",
     "Symmetry is key!", "Does anyone even read these?", "Task failed successfully.",
@@ -64,7 +59,6 @@ function AppContent() {
     "Technoblade never dies!"
   ];
   const [splashIndex, setSplashIndex] = useState(-1);
-
   const editions = [
     { id: 'legacy_evolved', name: 'Legacy Evolved', desc: 'Backporting the newer title updates back to the TU19 (like TU31)', url: 'https://github.com/piebotc/LegacyEvolved/releases/download/nightly/LCEWindows64.zip' },
     { id: 'vanilla_tu24', name: 'Title Update 24', desc: 'Based on TU19, but with the features of TU24.', url: 'https://huggingface.co/datasets/KayJann/emerald-legacy-assets/resolve/main/emerald_tu24_vanilla.zip' },
@@ -83,7 +77,6 @@ function AppContent() {
   const playBackSound = () => { const a = new Audio('/sounds/back_click.ogg'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
   const playSfx = (file: string) => { const a = new Audio(`/sounds/${file}`); a.volume = sfxVol / 100; a.play().catch(() => { }); };
   const playSplashSound = () => { const a = new Audio('/sounds/splash_text_click.ogg'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
-
   const cycleSplash = () => {
     playSplashSound();
     let newIndex;
@@ -102,7 +95,6 @@ function AppContent() {
   const toggleInstall = async (id: string) => {
     const edition = editions.find(e => e.id === id);
     if (!edition) return;
-
     try {
       setDownloadingId(id);
       setDownloadProgress(0);
@@ -125,7 +117,6 @@ function AppContent() {
     appWindow.show();
     setTimeout(() => setShowIntro(false), 2800);
     setTimeout(() => setLogoAnimDone(true), 3400);
-
     TauriService.loadConfig().then(config => {
       if (config.username) setUsername(config.username);
       if (config.skinBase64) setSkinUrl(config.skinBase64);
@@ -135,9 +126,7 @@ function AppContent() {
     });
 
     checkInstalls();
-
     const unlistenDownload = TauriService.onDownloadProgress(p => setDownloadProgress(p));
-
     return () => {
       unlistenDownload.then(u => u());
     };
@@ -162,11 +151,9 @@ function AppContent() {
   }, [currentTrack, showIntro]);
 
   useEffect(() => { if (audioElement) audioElement.volume = musicVol / 100; }, [musicVol, audioElement]);
-
   useEffect(() => {
     const syncSkin = async () => {
       if (!skinUrl) return;
-
       try {
         const img = new Image();
         img.crossOrigin = "anonymous";
@@ -190,7 +177,6 @@ function AppContent() {
 
   useEffect(() => {
     if (!skinBase64 && skinUrl && !skinUrl.startsWith('data:')) return;
-
     TauriService.saveConfig({
       username,
       skinBase64: skinBase64 || skinUrl,
@@ -229,6 +215,36 @@ function AppContent() {
     }
   };
 
+  useEffect(() => {
+    const updateRPC = async () => {
+      if (showIntro || !username) return;
+
+      const version = editions.find(e => e.id === profile);
+      const versionName = version ? version.name : "Unknown Version";
+
+      let details = "In Menus";
+      let state = `Playing as ${username}`;
+
+      if (isGameRunning) {
+        details = `Playing ${versionName}`;
+      } else {
+        const tabNames: Record<string, string> = {
+          main: "Main Menu",
+          versions: "Selecting Version",
+          settings: "In Settings",
+          themes: "Browsing Themes",
+          skins: "Browsing Skins",
+          marketplace: "Browsing Marketplace"
+        };
+        details = tabNames[activeView] || "In Menus";
+      }
+
+      await RpcService.updateActivity(details, state, isGameRunning);
+    };
+
+    updateRPC();
+  }, [username, isGameRunning, profile, activeView, showIntro, editions]);
+
   return (
     <div data-tauri-drag-region className="w-screen h-screen overflow-hidden select-none flex flex-col relative bg-black text-white font-['Mojangles'] outline-none focus:outline-none">
       <style>{`
@@ -243,11 +259,9 @@ function AppContent() {
       `}</style>
 
       <PanoramaBackground profile={profile} isDay={isDayTime} />
-
       <AnimatePresence>
         {showCredits && <TeamModal isOpen={showCredits} onClose={() => setShowCredits(false)} playClickSound={playClickSound} playBackSound={playBackSound} />}
       </AnimatePresence>
-
       <AnimatePresence>
         {downloadProgress !== null && (
           <motion.div
