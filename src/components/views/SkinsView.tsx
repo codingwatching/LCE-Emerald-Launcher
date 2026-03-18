@@ -113,12 +113,24 @@ export default function SkinsView({ skinUrl, setSkinUrl, playClickSound, playBac
     const defaultName = file.name.replace('.png', '').substring(0, 16);
     const reader = new FileReader();
     reader.onload = (event) => {
-      const base64String = event.target?.result as string;
-      const newId = Date.now().toString();
-      const newSkin = { id: newId, name: defaultName, url: base64String };
-      setSavedSkins([...savedSkins, newSkin]);
-      setSkinUrl(base64String);
-      setActiveSkinId(newId);
+      const url = event.target?.result as string;
+      const img = new Image();
+      img.onload = () => {
+        const cvs = document.createElement("canvas");
+        cvs.width = 64;
+        cvs.height = 32;
+        const ctx = cvs.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 64, 32, 0, 0, 64, 32);
+          const base64String = cvs.toDataURL("image/png");
+          const newId = Date.now().toString();
+          const newSkin = { id: newId, name: defaultName, url: base64String };
+          setSavedSkins([...savedSkins, newSkin]);
+          setSkinUrl(base64String);
+          setActiveSkinId(newId);
+        }
+      };
+      img.src = url;
     };
     reader.readAsDataURL(file);
     e.target.value = '';

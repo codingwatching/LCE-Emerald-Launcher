@@ -41,6 +41,7 @@ function AppContent() {
   const [layout, setLayout] = useLocalStorage('lce-layout', 'KBM');
   const [username, setUsername] = useLocalStorage('lce-username', 'Steve');
   const [skinUrl, setSkinUrl] = useLocalStorage('lce-skin', '/images/Default.png');
+  const [skinBase64, setSkinBase64] = useState<string | null>(null);
 
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
@@ -163,14 +164,41 @@ function AppContent() {
   useEffect(() => { if (audioElement) audioElement.volume = musicVol / 100; }, [musicVol, audioElement]);
 
   useEffect(() => {
+    const syncSkin = async () => {
+      if (!skinUrl) return;
+
+      try {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          const cvs = document.createElement("canvas");
+          cvs.width = 64;
+          cvs.height = 32;
+          const ctx = cvs.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, 64, 32, 0, 0, 64, 32);
+            setSkinBase64(cvs.toDataURL("image/png"));
+          }
+        };
+        img.src = skinUrl;
+      } catch (e) {
+        console.error("Skin conversion failed:", e);
+      }
+    };
+    syncSkin();
+  }, [skinUrl]);
+
+  useEffect(() => {
+    if (!skinBase64 && skinUrl && !skinUrl.startsWith('data:')) return;
+
     TauriService.saveConfig({
       username,
-      skinBase64: skinUrl,
+      skinBase64: skinBase64 || skinUrl,
       themeStyleId: theme,
       linuxRunner,
       appleSiliconPerformanceBoost: perfBoost
     }).catch(() => { });
-  }, [username, skinUrl, theme, linuxRunner, perfBoost]);
+  }, [username, skinBase64, theme, linuxRunner, perfBoost]);
 
   useEffect(() => {
     const handleContextMenu = (e: MouseEvent) => e.preventDefault();
@@ -237,8 +265,8 @@ function AppContent() {
               {editions.find(e => e.id === downloadingId)?.name || 'Game Files'}
             </div>
             <div className="w-full h-2 bg-black/40 border border-[#373737] relative overflow-hidden">
-              <div 
-                className="h-full bg-[#FFFF55] transition-all duration-300" 
+              <div
+                className="h-full bg-[#FFFF55] transition-all duration-300"
                 style={{ width: `${downloadProgress}%` }}
               />
             </div>
