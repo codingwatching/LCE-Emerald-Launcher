@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
 export default function VersionsView({ selectedProfile, setSelectedProfile, installedVersions, toggleInstall, playClickSound, playBackSound, setActiveView, editions }: any) {
-  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+  const [focusRow, setFocusRow] = useState<number>(0);
+  const [focusCol, setFocusCol] = useState<number>(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const ITEM_COUNT = editions.length + 1; // Editions + Back button
+  const ITEM_COUNT = editions.length + 1;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -17,121 +18,140 @@ export default function VersionsView({ selectedProfile, setSelectedProfile, inst
       }
 
       if (e.key === 'ArrowDown') {
-        setFocusIndex(prev => (prev === null || prev >= ITEM_COUNT - 1) ? 0 : prev + 1);
+        setFocusRow(prev => (prev >= ITEM_COUNT - 1) ? 0 : prev + 1);
+        setFocusCol(0);
       } else if (e.key === 'ArrowUp') {
-        setFocusIndex(prev => (prev === null || prev <= 0) ? ITEM_COUNT - 1 : prev - 1);
+        setFocusRow(prev => (prev <= 0) ? ITEM_COUNT - 1 : prev - 1);
+        setFocusCol(0);
+      } else if (e.key === 'ArrowRight') {
+        if (focusRow < editions.length) {
+          const isInstalled = installedVersions.includes(editions[focusRow].id);
+          const maxCol = isInstalled ? 2 : 1;
+          setFocusCol(prev => prev < maxCol ? prev + 1 : prev);
+        }
+      } else if (e.key === 'ArrowLeft') {
+        setFocusCol(prev => prev > 0 ? prev - 1 : prev);
       } else if (e.key === 'Enter') {
-        if (focusIndex !== null) {
-           if (focusIndex < editions.length) {
-              const edition = editions[focusIndex];
-              if (installedVersions.includes(edition.id)) {
-                 playClickSound();
-                 setSelectedProfile(edition.id);
-              }
-           } else {
-              playBackSound();
-              setActiveView('main');
-           }
+        if (focusRow < editions.length) {
+          const edition = editions[focusRow];
+          const isInstalled = installedVersions.includes(edition.id);
+          if (focusCol === 0) {
+            if (isInstalled) {
+              playClickSound();
+              setSelectedProfile(edition.id);
+            } else {
+              playClickSound();
+              toggleInstall(edition.id);
+            }
+          } else if (focusCol === 1) {
+            playClickSound();
+            toggleInstall(edition.id);
+          } else if (focusCol === 2) {
+            playClickSound();
+          }
+        } else {
+          playBackSound();
+          setActiveView('main');
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusIndex, editions, installedVersions, playClickSound, playBackSound, setSelectedProfile, setActiveView]);
+  }, [focusRow, focusCol, editions, installedVersions, playClickSound, playBackSound, setSelectedProfile, setActiveView, toggleInstall, ITEM_COUNT]);
 
   useEffect(() => {
-    if (focusIndex !== null) {
-      const el = containerRef.current?.querySelector(`[data-index="${focusIndex}"]`) as HTMLElement;
-      if (el) el.focus();
-    }
-  }, [focusIndex]);
+    const el = containerRef.current?.querySelector(`[data-row="${focusRow}"][data-col="${focusCol}"]`) as HTMLElement;
+    if (el) el.focus();
+  }, [focusRow, focusCol]);
 
   return (
-    <motion.div ref={containerRef} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center w-full max-w-4xl outline-none">
-      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80">Versions</h2>
-      
-      <div className="w-full max-w-[700px] h-[350px] overflow-y-auto mb-6 p-4 shadow-2xl relative" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
-        
-        <div className="flex flex-col gap-3">
-            {editions.map((edition: any, i: number) => {
-                const isInstalled = installedVersions.includes(edition.id);
-                const isSelected = selectedProfile === edition.id;
-                const isFocused = focusIndex === i;
-                
-                return (
-                    <div 
-                        key={edition.id}
-                        data-index={i}
-                        tabIndex={0}
-                        onMouseEnter={() => setFocusIndex(i)}
-                        onClick={() => {
-                            if (isInstalled) {
-                                playClickSound();
-                                setSelectedProfile(edition.id);
-                            }
-                        }}
-                        className={`w-full p-4 flex items-center transition-all outline-none border-none ${isInstalled ? 'cursor-pointer hover:text-[#FFFF55]' : 'opacity-70'}`}
-                        style={{ 
-                          backgroundImage: (isSelected || isFocused) ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", 
-                          backgroundSize: "100% 100%", 
-                          imageRendering: "pixelated" 
-                        }}
-                    >
-                        <div className="w-[100px] flex-shrink-0"></div>
-                        
-                        <div className="flex-1 flex flex-col items-center justify-center text-center">
-                            <span className={`text-2xl mc-text-shadow ${(isSelected || isFocused) ? 'text-[#FFFF55]' : 'text-white'}`}>{edition.name}</span>
-                            <span className="text-base text-[#E0E0E0] mc-text-shadow mt-1">{edition.desc}</span>
-                        </div>
-                        
-                        <div className="flex gap-4 items-center justify-end w-[100px] pr-2">
-                            {!isInstalled ? (
-                                <button 
-                                    tabIndex={-1}
-                                    onClick={(e) => { e.stopPropagation(); playClickSound(); toggleInstall(edition.id); }}
-                                    className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none"
-                                >
-                                    <img src="/images/Download_Icon.png" alt="Download" className="w-6 h-6 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
-                                </button>
-                            ) : (
-                                <>
-                                    <button 
-                                        tabIndex={-1}
-                                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
-                                        className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none"
-                                    >
-                                        <img src="/images/Update_Icon.png" alt="Update" className="w-6 h-6 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
-                                    </button>
-                                    <button 
-                                        tabIndex={-1}
-                                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
-                                        className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none"
-                                    >
-                                        <img src="/images/Folder_Icon.png" alt="Open Folder" className="w-6 h-6 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                );
-            })}
-        </div>
+    <motion.div ref={containerRef} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center w-full max-w-4xl outline-none">
+      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80 font-bold">Versions</h2>
 
+      <div className="w-full max-w-[740px] h-[380px] overflow-y-auto mb-6 p-6 shadow-2xl relative" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
+        <div className="flex flex-col gap-3">
+          {editions.map((edition: any, i: number) => {
+            const isInstalled = installedVersions.includes(edition.id);
+            const isSelected = selectedProfile === edition.id;
+            const isRowFocused = focusRow === i;
+
+            return (
+              <div
+                key={edition.id}
+                className={`w-full flex items-center transition-all border-none outline-none`}
+                style={{
+                  backgroundImage: (isSelected || (isRowFocused && focusCol === 0)) ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')",
+                  backgroundSize: "100% 100%",
+                  imageRendering: "pixelated"
+                }}
+              >
+                <div
+                  data-row={i} data-col={0} tabIndex={0}
+                  onMouseEnter={() => { setFocusRow(i); setFocusCol(0); }}
+                  onClick={() => { if (isInstalled) { playClickSound(); setSelectedProfile(edition.id); } else { toggleInstall(edition.id); } }}
+                  className="flex-1 p-4 flex items-center cursor-pointer outline-none pl-6 text-left"
+                >
+                  <div className="flex flex-col">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-2xl mc-text-shadow ${(isSelected || (isRowFocused && focusCol === 0)) ? 'text-[#FFFF55]' : 'text-white'}`}>{edition.name}</span>
+                    </div>
+                    <span className="text-base text-[#E0E0E0] mc-text-shadow truncate w-full">{edition.desc}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-3 pr-6">
+                  {!isInstalled ? (
+                    <button
+                      data-row={i} data-col={1}
+                      onMouseEnter={() => { setFocusRow(i); setFocusCol(1); }}
+                      onClick={(e) => { e.stopPropagation(); playClickSound(); toggleInstall(edition.id); }}
+                      className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
+                      style={{ backgroundImage: (isRowFocused && focusCol === 1) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
+                    >
+                      <img src="/images/Download_Icon.png" alt="Download" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        data-row={i} data-col={1}
+                        onMouseEnter={() => { setFocusRow(i); setFocusCol(1); }}
+                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                        className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
+                        style={{ backgroundImage: (isRowFocused && focusCol === 1) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
+                      >
+                        <img src="/images/Update_Icon.png" alt="Update" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                      </button>
+                      <button
+                        data-row={i} data-col={2}
+                        onMouseEnter={() => { setFocusRow(i); setFocusCol(2); }}
+                        onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                        className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
+                        style={{ backgroundImage: (isRowFocused && focusCol === 2) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
+                      >
+                        <img src="/images/Folder_Icon.png" alt="Folder" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
-      <button 
-        data-index={editions.length}
-        onMouseEnter={() => setFocusIndex(editions.length)}
-        onClick={() => { playBackSound(); setActiveView('main'); }} 
-        className={`w-72 h-14 flex items-center justify-center transition-colors text-2xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${focusIndex === editions.length ? 'text-[#FFFF55]' : 'text-white'}`}
-        style={{ 
-          backgroundImage: focusIndex === editions.length ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", 
-          backgroundSize: '100% 100%', 
-          imageRendering: 'pixelated' 
+      <button
+        data-row={editions.length} data-col={0}
+        onMouseEnter={() => { setFocusRow(editions.length); setFocusCol(0); }}
+        onClick={() => { playBackSound(); setActiveView('main'); }}
+        className={`w-72 h-14 flex items-center justify-center transition-colors text-2xl mc-text-shadow outline-none border-none ${focusRow === editions.length ? 'text-[#FFFF55]' : 'text-white'}`}
+        style={{
+          backgroundImage: focusRow === editions.length ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')",
+          backgroundSize: '100% 100%',
+          imageRendering: 'pixelated'
         }}
       >
         Back
       </button>
     </motion.div>
   );
-}
+}
