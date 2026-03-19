@@ -203,7 +203,7 @@ function AppContent() {
 
   useEffect(() => {
     appWindow.show();
-    setTimeout(() => setShowIntro(false), 2800);
+    setTimeout(() => setShowIntro(false), 2400);
     setTimeout(() => setLogoAnimDone(true), 3400);
     TauriService.loadConfig().then((config) => {
       if (config.username) setUsername(config.username);
@@ -390,7 +390,7 @@ function AppContent() {
     >
       <style>{`
         @keyframes splashPulse { 0% { transform: scale(0.95) rotate(-20deg); } 100% { transform: scale(1.08) rotate(-20deg); } }
-        .mc-splash { animation: splashPulse 0.4s ease-in-out infinite alternate; transform-origin: center; }
+        .mc-splash { animation: splashPulse 0.45s ease-in-out infinite alternate; transform-origin: center; }
         .mc-slider-custom { -webkit-appearance: none; appearance: none; background: transparent; height: 100%; outline: none; border: none; margin: 0; padding: 0; }
         .mc-slider-custom::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 44px; background: url('/images/Slider_Handle.png') no-repeat center; background-size: 100% 100%; cursor: pointer; position: relative; z-index: 30; }
         *:focus { outline: none !important; box-shadow: none !important; }
@@ -417,7 +417,7 @@ function AppContent() {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 50 }}
-            className="absolute top-14 right-8 z-[100] w-64 p-4 shadow-2xl flex flex-col gap-2"
+            className="absolute top-14 right-8 z-100 w-64 p-4 shadow-2xl flex flex-col gap-2"
             style={{
               backgroundImage: "url('/images/Download_Background.png')",
               backgroundSize: "100% 100%",
@@ -436,7 +436,7 @@ function AppContent() {
                 <span className="text-[10px] text-white mc-text-shadow w-6 text-right shrink-0 flex items-center justify-end h-[14px] leading-none">
                   {Math.floor(downloadProgress)}%
                 </span>
-                <div className="flex-1 h-[14px] border-2 border-white bg-black/40 relative">
+                <div className="flex-1 h-3.5 border-2 border-white bg-black/40 relative">
                   <div
                     className="h-full bg-white transition-all duration-300"
                     style={{ width: `${downloadProgress}%` }}
@@ -462,7 +462,6 @@ function AppContent() {
             key="intro"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, filter: "blur(12px)" }}
             className="flex flex-1 items-center justify-center z-10 pointer-events-none"
           >
             <motion.img
@@ -491,12 +490,12 @@ function AppContent() {
                 >
                   <div
                     data-tauri-drag-region
-                    className="pl-3 flex items-center justify-center gap-[6px] pointer-events-none h-full pt-[2px]"
+                    className="pl-3 flex items-center justify-center gap-1.5 pointer-events-none h-full pt-0.5"
                   >
                     <img
                       src="/images/icon.png"
                       alt="Icon"
-                      className="w-[16px] h-[16px] object-contain block"
+                      className="w-4 h-4 object-contain block"
                       style={{ imageRendering: "pixelated" }}
                     />
                     <span className="text-xs text-gray-300 mc-text-shadow opacity-90 tracking-wide leading-none block pt-[1px]">
@@ -632,11 +631,16 @@ function AppContent() {
               data-tauri-drag-region
               className="shrink-0 flex justify-center py-4 relative w-full pt-12"
             >
-              <div className="relative w-full max-w-[540px] flex justify-center">
+              <div className="relative w-full max-w-135 flex justify-center">
                 <motion.img
                   layoutId="mainLogo"
                   src="/images/MenuTitle.png"
-                  className="w-full drop-shadow-[0_8px_8px_rgba(0,0,0,0.8)] pointer-events-none"
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 25,
+                  }}
+                  className="w-full drop-shadow-[0_8px_6px_rgba(0,0,0,0.8)] pointer-events-none"
                   style={{ imageRendering: "pixelated" }}
                 />
                 <AnimatePresence>
@@ -648,7 +652,7 @@ function AppContent() {
                     >
                       <div
                         onClick={cycleSplash}
-                        className="mc-splash text-[#FFFF55] text-[28px] cursor-pointer whitespace-nowrap"
+                        className="mc-splash text-[#FFFF55] text-[28px] z-100 cursor-pointer whitespace-nowrap"
                         style={{ textShadow: "2px 2px 0px #3F3F00" }}
                       >
                         {splashIndex === -1
