@@ -325,7 +325,13 @@ async fn download_runner(app: AppHandle, state: State<'_, DownloadState>, name: 
 
     let token = CancellationToken::new();
     let child_token = token.clone();
-    { *state.token.lock().await = Some(token); }
+    {
+        let mut lock = state.token.lock().await;
+        if let Some(old_token) = lock.take() {
+            old_token.cancel();
+        }
+        *lock = Some(token);
+    }
 
     let tarball_path = runners_dir.join(format!("{}.tar.xz", name));
     let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
@@ -585,7 +591,13 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
     let instance_dir = root.join("instances").join(&instanceId);
     let token = CancellationToken::new();
     let child_token = token.clone();
-    { *state.token.lock().await = Some(token); }
+    {
+        let mut lock = state.token.lock().await;
+        if let Some(old_token) = lock.take() {
+            old_token.cancel();
+        }
+        *lock = Some(token);
+    }
 
     if !instance_dir.exists() {
         fs::create_dir_all(&instance_dir).map_err(|e| e.to_string())?;

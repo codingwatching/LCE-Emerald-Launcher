@@ -8,7 +8,8 @@ export default function VersionsView({
   installedVersions, toggleInstall,
   playClickSound, playBackSound,
   setActiveView, editions,
-  onAddEdition, onDeleteEdition, onUninstall
+  onAddEdition, onDeleteEdition, onUninstall,
+  downloadProgress, downloadingId
 }: any) {
   const [focusRow, setFocusRow] = useState<number>(0);
   const [focusCol, setFocusCol] = useState<number>(0);
@@ -55,11 +56,11 @@ export default function VersionsView({
             if (isInstalled) {
               playClickSound();
               setSelectedProfile(edition.id);
-            } else {
+            } else if (!downloadingId) {
               playClickSound();
               toggleInstall(edition.id);
             }
-          } else if (focusCol === 1) {
+          } else if (focusCol === 1 && !downloadingId) {
             playClickSound();
             toggleInstall(edition.id);
           } else if (focusCol === 2) {
@@ -141,22 +142,34 @@ export default function VersionsView({
                     <button
                       data-row={i} data-col={1}
                       onMouseEnter={() => { setFocusRow(i); setFocusCol(1); }}
-                      onClick={(e) => { e.stopPropagation(); playClickSound(); toggleInstall(edition.id); }}
-                      className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
+                      onClick={(e) => { e.stopPropagation(); if (!downloadingId) { playClickSound(); toggleInstall(edition.id); } }}
+                      className={`mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all ${downloadingId === edition.id ? 'opacity-100' : (downloadingId ? 'opacity-50' : '')}`}
                       style={{ backgroundImage: (isRowFocused && focusCol === 1) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                     >
-                      <img src="/images/Download_Icon.png" alt="Download" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                      {downloadingId === edition.id ? (
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="text-[10px] text-white font-bold leading-none">{Math.floor(downloadProgress || 0)}%</span>
+                        </div>
+                      ) : (
+                        <img src="/images/Download_Icon.png" alt="Download" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                      )}
                     </button>
                   ) : (
                     <>
                       <button
                         data-row={i} data-col={1}
                         onMouseEnter={() => { setFocusRow(i); setFocusCol(1); }}
-                        onClick={(e) => { e.stopPropagation(); playClickSound(); toggleInstall(edition.id); }}
-                        className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
+                        onClick={(e) => { e.stopPropagation(); if (!downloadingId) { playClickSound(); toggleInstall(edition.id); } }}
+                        className={`mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all ${downloadingId === edition.id ? 'opacity-100' : (downloadingId ? 'opacity-50' : '')}`}
                         style={{ backgroundImage: (isRowFocused && focusCol === 1) ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                       >
-                        <img src="/images/Update_Icon.png" alt="Update" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                        {downloadingId === edition.id ? (
+                          <div className="flex flex-col items-center justify-center">
+                            <span className="text-[10px] text-white font-bold leading-none">{Math.floor(downloadProgress || 0)}%</span>
+                          </div>
+                        ) : (
+                          <img src="/images/Update_Icon.png" alt="Update" className="w-8 h-8 object-contain pointer-events-none drop-shadow-md" style={{ imageRendering: 'pixelated' }} />
+                        )}
                       </button>
                       <button
                         data-row={i} data-col={2}

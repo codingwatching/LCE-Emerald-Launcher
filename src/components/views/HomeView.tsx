@@ -18,7 +18,7 @@ export default function HomeView({
   const buttons = [
     { 
       label: isGameRunning ? 'Stop Game' : (isDownloading ? `Downloading... ${Math.floor(downloadProgress || 0)}%` : (isInstalled ? `Play ${selectedVersionName}` : `Download ${selectedVersionName}`)), 
-      action: isGameRunning ? stopGame : (isInstalled ? handleLaunch : () => toggleInstall(profile)),
+      action: isGameRunning ? stopGame : (isDownloading ? () => {} : (isInstalled ? handleLaunch : () => toggleInstall(profile))),
       isDanger: isGameRunning
     },
     { label: 'Help & Options', action: () => setActiveView('settings') },

@@ -114,6 +114,7 @@ function AppContent() {
   };
 
   const toggleInstall = async (id: string) => {
+    if (downloadingId) return;
     const edition = editions.find(e => e.id === id);
     if (!edition) return;
     try {
@@ -405,7 +406,7 @@ function AppContent() {
                       />
                     )}
                     {activeView === 'settings' && <SettingsView vfxEnabled={vfxEnabled} setVfxEnabled={setVfxEnabled} music={musicVol} setMusic={setMusicVol} sfx={sfxVol} setSfx={setSfxVol} layout={layout} setLayout={setLayout} currentTrack={currentTrack} setCurrentTrack={setCurrentTrack} tracks={tracks} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} linuxRunner={linuxRunner} setLinuxRunner={setLinuxRunner} perfBoost={perfBoost} setPerfBoost={setPerfBoost} />}
-                    {activeView === 'versions' && <VersionsView selectedProfile={profile} setSelectedProfile={setProfile} installedVersions={installs} toggleInstall={toggleInstall} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} editions={editions} onAddEdition={addCustomEdition} onDeleteEdition={deleteCustomEdition} onUninstall={handleUninstall} />}
+                    {activeView === 'versions' && <VersionsView selectedProfile={profile} setSelectedProfile={setProfile} installedVersions={installs} toggleInstall={toggleInstall} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} editions={editions} onAddEdition={addCustomEdition} onDeleteEdition={deleteCustomEdition} onUninstall={handleUninstall} downloadProgress={downloadProgress} downloadingId={downloadingId} />}
                     {activeView === 'marketplace' && <MarketplaceView playBackSound={playBackSound} setActiveView={setActiveView} />}
                     {activeView === 'themes' && <ThemesView theme={theme} setTheme={setTheme} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
                     {activeView === 'skins' && <SkinsView skinUrl={skinUrl} setSkinUrl={setSkinUrl} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
