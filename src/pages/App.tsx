@@ -94,7 +94,7 @@ function AppContent() {
   ];
 
   const playClickSound = () => { const a = new Audio('/sounds/click.wav'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
-  const playBackSound = () => { const a = new Audio('/sounds/back_click.ogg'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
+  const playBackSound = () => { const a = new Audio('/sounds/back.ogg'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
   const playSfx = (file: string) => { const a = new Audio(`/sounds/${file}`); a.volume = sfxVol / 100; a.play().catch(() => { }); };
   const playSplashSound = () => { const a = new Audio('/sounds/splash_text_click.ogg'); a.volume = sfxVol / 100; a.play().catch(() => { }); };
   const cycleSplash = () => {
