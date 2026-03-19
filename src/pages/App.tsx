@@ -68,7 +68,6 @@ function AppContent() {
   ];
 
   const editions = [...baseEditions, ...customEditions];
-
   const addCustomEdition = (edition: { name: string, desc: string, url: string }) => {
     const id = `custom_${Date.now()}`;
     const newEdition = { ...edition, id };

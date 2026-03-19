@@ -8,13 +8,26 @@ export const useGamepad = ({ playSfx }: UseGamepadProps) => {
   const [connected, setConnected] = useState(false);
   const connectedRef = useRef(false);
   const requestRef = useRef<number | undefined>(undefined);
+  const focusedRef = useRef(document.hasFocus());
   const lastButtons = useRef<Record<number, boolean>>({});
   const lastAxes = useRef<Record<number, number>>({});
-
   const stateRef = useRef({
     playSfx,
   });
-
+  useEffect(() => {
+    const onFocus = () => { focusedRef.current = true; };
+    const onBlur = () => {
+      focusedRef.current = false;
+      lastButtons.current = {};
+      lastAxes.current = {};
+    };
+    window.addEventListener('focus', onFocus);
+    window.addEventListener('blur', onBlur);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      window.removeEventListener('blur', onBlur);
+    };
+  }, []);
   useEffect(() => {
     stateRef.current = { playSfx };
   }, [playSfx]);
@@ -37,6 +50,10 @@ export const useGamepad = ({ playSfx }: UseGamepadProps) => {
   };
 
   const update = useCallback(() => {
+    if (!focusedRef.current) {
+      requestRef.current = requestAnimationFrame(update);
+      return;
+    }
     let anyConnected = false;
     try {
       const gamepads = navigator.getGamepads ? navigator.getGamepads() : null;
