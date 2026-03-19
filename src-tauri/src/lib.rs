@@ -606,7 +606,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
             for entry in entries.flatten() {
                 let file_name = entry.file_name();
                 let name_str = file_name.to_string_lossy();
-                
+
                 let keep_list = ["Windows64", "uid.dat", "username.txt", "settings.dat", "servers.dat", "servers.txt", "server.properties", "Common", "options.txt", "servers.db"];
                 if !keep_list.contains(&name_str.as_ref()) {
                     let path = entry.path();
@@ -768,7 +768,7 @@ fn ensure_server_list(instance_dir: &PathBuf, servers: Vec<McServer>) {
                     modified = true;
                 }
             }
-            
+
             if modified {
                 content[8..12].copy_from_slice(&count.to_le_bytes());
                 let _ = fs::write(&servers_db, content);
@@ -824,7 +824,7 @@ async fn launch_game(app: AppHandle, state: State<'_, GameState>, instanceId: St
 
                 cmd.arg(&game_exe)
                    .current_dir(&instance_dir);
-                
+
                 let child = cmd.spawn().map_err(|e| e.to_string())?;
                 {
                     let mut lock = state.child.lock().await;
@@ -1006,10 +1006,10 @@ fn kill_process_tree(app: &AppHandle, instance_id: &str) { // neo: dont question
 }
 
 #[tauri::command]
-async fn stop_game(app: AppHandle, instanceId: String, state: State<'_, GameState>) -> Result<(), String> {
+async fn stop_game(app: AppHandle, instance_id: String, state: State<'_, GameState>) -> Result<(), String> {
     let mut lock = state.child.lock().await;
     if let Some(mut child) = lock.take() {
-        #[cfg(unix)] kill_process_tree(&app, &instanceId);
+        #[cfg(unix)] kill_process_tree(&app, &instance_id);
         let _ = child.kill().await;
     }
     Ok(())

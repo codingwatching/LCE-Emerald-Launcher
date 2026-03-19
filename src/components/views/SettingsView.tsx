@@ -1,19 +1,31 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { TauriService, Runner } from '../../services/TauriService';
-import { usePlatform } from '../../hooks/usePlatform';
+import { useState, useEffect, useRef, useMemo } from "react";
+import { motion } from "framer-motion";
+import { TauriService, Runner } from "../../services/TauriService";
+import { usePlatform } from "../../hooks/usePlatform";
 
 export default function SettingsView({
-  vfxEnabled, setVfxEnabled,
-  music: musicVolume, setMusic: setMusicVolume,
-  sfx: sfxVolume, setSfx: setSfxVolume,
-  layout, setLayout,
-  currentTrack, setCurrentTrack,
+  vfxEnabled,
+  setVfxEnabled,
+  music: musicVolume,
+  setMusic: setMusicVolume,
+  sfx: sfxVolume,
+  setSfx: setSfxVolume,
+  layout,
+  setLayout,
+  currentTrack,
+  setCurrentTrack,
   tracks,
-  playClickSound, playBackSound, setActiveView,
-  linuxRunner, setLinuxRunner,
-  perfBoost, setPerfBoost,
-  isGameRunning, stopGame
+  playClickSound,
+  playBackSound,
+  setActiveView,
+  linuxRunner,
+  setLinuxRunner,
+  perfBoost,
+  setPerfBoost,
+  isGameRunning,
+  stopGame,
+  rpcEnabled,
+  setRpcEnabled,
 }: any) {
   const { isLinux, isMac } = usePlatform();
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
@@ -45,10 +57,15 @@ export default function SettingsView({
     setPerfBoost(!perfBoost);
   };
 
+  const handleRpcToggle = () => {
+    playClickSound();
+    setRpcEnabled(!rpcEnabled);
+  };
+
   const handleRunnerToggle = () => {
     playClickSound();
     if (runners.length === 0) return;
-    const currentIndex = runners.findIndex(r => r.id === linuxRunner);
+    const currentIndex = runners.findIndex((r) => r.id === linuxRunner);
     const nextIndex = (currentIndex + 1) % runners.length;
     setLinuxRunner(runners[nextIndex].id);
   };
@@ -72,132 +89,252 @@ export default function SettingsView({
   let trackName = "Unknown";
   if (tracks && tracks.length > 0) {
     const fullPath = tracks[currentTrack];
-    trackName = fullPath.split('/').pop().replace('.ogg', '').replace('.wav', '');
+    trackName = fullPath
+      .split("/")
+      .pop()
+      .replace(".ogg", "")
+      .replace(".wav", "");
   }
 
-  const selectedRunnerName = runners.find(r => r.id === linuxRunner)?.name || "Native / Default";
+  const selectedRunnerName =
+    runners.find((r) => r.id === linuxRunner)?.name || "Native / Default";
 
-  type SettingsItem = {
-    id: string;
-    label: string;
-    type: 'slider';
-    value: number;
-    onChange: (val: any) => void;
-  } | {
-    id: string;
-    label: string;
-    type: 'button';
-    onClick: () => void;
-    small?: boolean;
-    color?: string;
-  };
+  type SettingsItem =
+    | {
+        id: string;
+        label: string;
+        type: "slider";
+        value: number;
+        onChange: (val: any) => void;
+      }
+    | {
+        id: string;
+        label: string;
+        type: "button";
+        onClick: () => void;
+        small?: boolean;
+        color?: string;
+      };
 
   const settingsItems = useMemo<SettingsItem[]>(() => {
     const items: SettingsItem[] = [
-      { id: 'music', label: `Music: ${musicVolume}%`, type: 'slider', value: musicVolume, onChange: setMusicVolume },
-      { id: 'sfx', label: `SFX: ${sfxVolume}%`, type: 'slider', value: sfxVolume, onChange: setSfxVolume },
-      { id: 'track', label: `${trackName} - C418`, type: 'button', onClick: handleTrackToggle },
+      {
+        id: "music",
+        label: `Music: ${musicVolume}%`,
+        type: "slider",
+        value: musicVolume,
+        onChange: setMusicVolume,
+      },
+      {
+        id: "sfx",
+        label: `SFX: ${sfxVolume}%`,
+        type: "slider",
+        value: sfxVolume,
+        onChange: setSfxVolume,
+      },
+      {
+        id: "track",
+        label: `${trackName} - C418`,
+        type: "button",
+        onClick: handleTrackToggle,
+      },
     ];
 
     if (setVfxEnabled) {
-      items.push({ id: 'vfx', label: `VFX: ${vfxEnabled ? 'ON' : 'OFF'}`, type: 'button', onClick: handleVfxToggle });
+      items.push({
+        id: "vfx",
+        label: `VFX: ${vfxEnabled ? "ON" : "OFF"}`,
+        type: "button",
+        onClick: handleVfxToggle,
+      });
     }
 
-    items.push({ id: 'layout', label: `Layout: ${layout}`, type: 'button', onClick: handleLayoutToggle });
+    if (setRpcEnabled) {
+      items.push({
+        id: "rpc",
+        label: `Discord RPC: ${rpcEnabled ? "ON" : "OFF"}`,
+        type: "button",
+        onClick: handleRpcToggle,
+      });
+    }
+
+    items.push({
+      id: "layout",
+      label: `Layout: ${layout}`,
+      type: "button",
+      onClick: handleLayoutToggle,
+    });
 
     if (isLinux) {
-      items.push({ id: 'runner', label: `Runner: ${selectedRunnerName}`, type: 'button', onClick: handleRunnerToggle });
+      items.push({
+        id: "runner",
+        label: `Runner: ${selectedRunnerName}`,
+        type: "button",
+        onClick: handleRunnerToggle,
+      });
     }
 
     if (isMac) {
-      items.push({ id: 'perf', label: `M1/M2 Boost: ${perfBoost ? 'Enabled' : 'Disabled'}`, type: 'button', onClick: handlePerfToggle });
-      items.push({ id: 'macos_setup', label: 'Setup macOS Compatibility', type: 'button', onClick: handleMacosSetup, small: true });
+      items.push({
+        id: "perf",
+        label: `M1/M2 Boost: ${perfBoost ? "Enabled" : "Disabled"}`,
+        type: "button",
+        onClick: handlePerfToggle,
+      });
+      items.push({
+        id: "macos_setup",
+        label: "Setup macOS Compatibility",
+        type: "button",
+        onClick: handleMacosSetup,
+        small: true,
+      });
     }
 
     if (isGameRunning) {
-      items.push({ id: 'stop', label: 'STOP GAME', type: 'button', onClick: stopGame, color: 'red' });
+      items.push({
+        id: "stop",
+        label: "STOP GAME",
+        type: "button",
+        onClick: stopGame,
+        color: "red",
+      });
     }
 
-    items.push({ id: 'back', label: 'Back', type: 'button', onClick: () => { playBackSound(); setActiveView('main'); } });
+    items.push({
+      id: "back",
+      label: "Back",
+      type: "button",
+      onClick: () => {
+        playBackSound();
+        setActiveView("main");
+      },
+    });
 
     return items;
-  }, [musicVolume, sfxVolume, trackName, vfxEnabled, layout, isLinux, isMac, selectedRunnerName, perfBoost, isGameRunning, handleTrackToggle, handleVfxToggle, handleLayoutToggle, handleRunnerToggle, handlePerfToggle, handleMacosSetup, stopGame, playBackSound, setActiveView, setMusicVolume, setSfxVolume, setVfxEnabled]);
+  }, [
+    musicVolume,
+    sfxVolume,
+    trackName,
+    vfxEnabled,
+    layout,
+    isLinux,
+    isMac,
+    selectedRunnerName,
+    perfBoost,
+    isGameRunning,
+    handleTrackToggle,
+    handleVfxToggle,
+    handleLayoutToggle,
+    handleRunnerToggle,
+    handlePerfToggle,
+    handleMacosSetup,
+    stopGame,
+    playBackSound,
+    setActiveView,
+    setMusicVolume,
+    setSfxVolume,
+    setVfxEnabled,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Backspace') {
+      if (e.key === "Escape" || e.key === "Backspace") {
         playBackSound();
-        setActiveView('main');
+        setActiveView("main");
         return;
       }
 
       const itemCount = settingsItems.length;
 
-      if (e.key === 'ArrowDown') {
-        setFocusIndex(prev => (prev === null || prev >= itemCount - 1) ? 0 : prev + 1);
-      } else if (e.key === 'ArrowUp') {
-        setFocusIndex(prev => (prev === null || prev <= 0) ? itemCount - 1 : prev - 1);
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      if (e.key === "ArrowDown") {
+        setFocusIndex((prev) =>
+          prev === null || prev >= itemCount - 1 ? 0 : prev + 1,
+        );
+      } else if (e.key === "ArrowUp") {
+        setFocusIndex((prev) =>
+          prev === null || prev <= 0 ? itemCount - 1 : prev - 1,
+        );
+      } else if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
         if (focusIndex === null) return;
         const item = settingsItems[focusIndex];
-        if (item.type === 'slider') {
-          const delta = e.key === 'ArrowRight' ? 5 : -5;
+        if (item.type === "slider") {
+          const delta = e.key === "ArrowRight" ? 5 : -5;
           item.onChange((v: number) => Math.max(0, Math.min(100, v + delta)));
         }
-      } else if (e.key === 'Enter' && focusIndex !== null) {
+      } else if (e.key === "Enter" && focusIndex !== null) {
         const item = settingsItems[focusIndex];
-        if (item.type === 'button') {
+        if (item.type === "button") {
           item.onClick();
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [focusIndex, settingsItems, playBackSound, setActiveView]);
 
   useEffect(() => {
     if (focusIndex !== null) {
-      const el = containerRef.current?.querySelector(`[data-index="${focusIndex}"]`) as HTMLElement;
+      const el = containerRef.current?.querySelector(
+        `[data-index="${focusIndex}"]`,
+      ) as HTMLElement;
       if (el) el.focus();
     }
   }, [focusIndex]);
 
   const getItemStyle = (index: number) => ({
-    backgroundImage: focusIndex === index ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')",
+    backgroundImage:
+      focusIndex === index
+        ? "url('/images/button_highlighted.png')"
+        : "url('/images/Button_Background.png')",
     backgroundSize: "100% 100%",
-    imageRendering: "pixelated" as const
+    imageRendering: "pixelated" as const,
   });
 
   const getSliderStyle = (index: number) => ({
     backgroundImage: "url('/images/Button_Background2.png')",
     backgroundSize: "100% 100%",
     imageRendering: "pixelated" as const,
-    color: focusIndex === index ? '#FFFF55' : 'white'
+    color: focusIndex === index ? "#FFFF55" : "white",
   });
 
   return (
-    <motion.div ref={containerRef} tabIndex={-1} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center w-full max-w-2xl outline-none">
-      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80">Settings</h2>
+    <motion.div
+      ref={containerRef}
+      tabIndex={-1}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="flex flex-col items-center w-full max-w-2xl outline-none"
+    >
+      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80">
+        Settings
+      </h2>
 
       <div className="w-full max-w-[540px] space-y-2 mb-4 p-6 flex flex-col items-center overflow-y-auto max-h-[60vh]">
         {settingsItems.map((item, index) => {
-          if (item.id === 'back') return null;
+          if (item.id === "back") return null;
 
-          if (item.type === 'slider') {
+          if (item.type === "slider") {
             return (
               <div
                 key={item.id}
-                data-index={index} tabIndex={0}
+                data-index={index}
+                tabIndex={0}
                 onMouseEnter={() => setFocusIndex(index)}
                 className="relative w-[360px] h-10 flex items-center justify-center cursor-pointer transition-all outline-none border-none hover:text-[#FFFF55] shrink-0"
                 style={getSliderStyle(index)}
               >
-                <span className={`absolute z-10 text-xl mc-text-shadow pointer-events-none transition-colors tracking-widest ${focusIndex === index ? 'text-[#FFFF55]' : 'text-white'}`}>
+                <span
+                  className={`absolute z-10 text-xl mc-text-shadow pointer-events-none transition-colors tracking-widest ${focusIndex === index ? "text-[#FFFF55]" : "text-white"}`}
+                >
                   {item.label}
                 </span>
                 <div className="absolute w-full h-full flex items-center justify-center">
                   <input
-                    type="range" min="0" max="100" step="1"
+                    type="range"
+                    min="0"
+                    max="100"
+                    step="1"
                     value={item.value}
                     onChange={(e) => item.onChange(parseInt(e.target.value))}
                     onMouseUp={playClickSound}
@@ -208,7 +345,7 @@ export default function SettingsView({
             );
           }
 
-          const isRed = (item as any).color === 'red';
+          const isRed = (item as any).color === "red";
           const isSmall = (item as any).small;
 
           return (
@@ -217,13 +354,20 @@ export default function SettingsView({
               data-index={index}
               onMouseEnter={() => setFocusIndex(index)}
               onClick={item.onClick}
-              className={`w-[360px] h-10 flex items-center justify-center px-4 relative z-30 transition-colors outline-none border-none shrink-0 ${isRed
-                ? (focusIndex === index ? 'text-red-400' : 'text-red-200')
-                : (focusIndex === index ? 'text-[#FFFF55]' : 'text-white')
-                } ${isRed ? 'hover:text-red-500' : 'hover:text-[#FFFF55]'}`}
+              className={`w-[360px] h-10 flex items-center justify-center px-4 relative z-30 transition-colors outline-none border-none shrink-0 ${
+                isRed
+                  ? focusIndex === index
+                    ? "text-red-400"
+                    : "text-red-200"
+                  : focusIndex === index
+                    ? "text-[#FFFF55]"
+                    : "text-white"
+              } ${isRed ? "hover:text-red-500" : "hover:text-[#FFFF55]"}`}
               style={getItemStyle(index)}
             >
-              <span className={`mc-text-shadow tracking-widest uppercase ${isSmall ? 'text-xs' : 'text-xl'} truncate w-full text-center`}>
+              <span
+                className={`mc-text-shadow tracking-widest uppercase ${isSmall ? "text-xs" : "text-xl"} truncate w-full text-center`}
+              >
                 {item.label}
               </span>
             </button>
@@ -232,17 +376,18 @@ export default function SettingsView({
       </div>
 
       {(() => {
-        const backIndex = settingsItems.findIndex(i => i.id === 'back');
+        const backIndex = settingsItems.findIndex((i) => i.id === "back");
         const backItem = settingsItems[backIndex];
-        if (!backItem || backItem.type !== 'button') return null;
+        if (!backItem || backItem.type !== "button") return null;
 
         return (
           <button
             data-index={backIndex}
             onMouseEnter={() => setFocusIndex(backIndex)}
             onClick={backItem.onClick}
-            className={`w-72 h-10 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${focusIndex === backIndex ? 'text-[#FFFF55]' : 'text-white'
-              }`}
+            className={`w-72 h-10 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${
+              focusIndex === backIndex ? "text-[#FFFF55]" : "text-white"
+            }`}
             style={getItemStyle(backIndex)}
           >
             Back
