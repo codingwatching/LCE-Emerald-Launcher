@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { SkinViewer as Skinview3D, IdleAnimation } from 'skinview3d';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
@@ -105,7 +106,14 @@ export default function SkinViewer({ username, setUsername, playClickSound, skin
   }, [isFocusedSection, focusIndex]);
 
   return (
-    <div ref={containerRef} className={`absolute left-16 top-[42%] -translate-y-1/2 flex flex-col items-center gap-1 transition-opacity duration-300 ${!isFocusedSection ? 'opacity-60' : 'opacity-100'}`}>
+    <motion.div
+      ref={containerRef}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: isFocusedSection ? 1 : 0.6, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+      className="absolute left-16 top-[42%] -translate-y-1/2 flex flex-col items-center gap-1 outline-none"
+    >
       <div className={`bg-black/20 flex justify-center items-center mb-2 px-2 py-1 rounded-sm border-2 transition-colors ${isFocusedSection && focusIndex === 0 ? 'border-[#FFFF55]' : 'border-transparent'}`} data-focus="0" tabIndex={0}>
         <input
           type="text" value={username} maxLength={16}
@@ -126,7 +134,7 @@ export default function SkinViewer({ username, setUsername, playClickSound, skin
           data-focus="1" tabIndex={0}
           onMouseEnter={() => isFocusedSection && setFocusIndex(1)}
           onClick={() => { playClickSound(); setActiveView('skins'); }}
-          className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 1 ? 'scale-110 !backgroundImage-highlight' : ''}`}
+          className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 1 ? 'scale-110' : ''}`}
           style={isFocusedSection && focusIndex === 1 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
           title="Change Skin"
         >
@@ -153,6 +161,6 @@ export default function SkinViewer({ username, setUsername, playClickSound, skin
           <img src="/images/Trash_Bin_Icon.png" alt="Delete" className="w-8 h-8 object-contain brightness-200" style={{ imageRendering: 'pixelated' }} />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

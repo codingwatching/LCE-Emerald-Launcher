@@ -379,22 +379,26 @@ function AppContent() {
             </div>
 
             <main className="flex-1 w-full relative">
-              <div className={`w-full h-full flex flex-col items-center justify-center transition-opacity duration-300 ${(!logoAnimDone || isUiHidden) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+              <div className={`w-full h-full flex flex-col items-center justify-center ${(!logoAnimDone || isUiHidden) ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
 
-                {activeView === 'main' && (
-                  <SkinViewer
-                    username={username} setUsername={setUsername}
-                    playClickSound={playClickSound} skinUrl={skinUrl}
-                    setSkinUrl={setSkinUrl} setActiveView={setActiveView}
-                    isFocusedSection={focusSection === 'skin'}
-                    onNavigateRight={() => setFocusSection('menu')}
-                  />
-                )}
+                <AnimatePresence mode="wait">
+                  {activeView === 'main' && (
+                    <SkinViewer
+                      key="skin-viewer"
+                      username={username} setUsername={setUsername}
+                      playClickSound={playClickSound} skinUrl={skinUrl}
+                      setSkinUrl={setSkinUrl} setActiveView={setActiveView}
+                      isFocusedSection={focusSection === 'skin'}
+                      onNavigateRight={() => setFocusSection('menu')}
+                    />
+                  )}
+                </AnimatePresence>
 
                 <div className="w-full max-w-4xl relative flex justify-center items-center">
-                  <AnimatePresence>
+                  <AnimatePresence mode="wait">
                     {activeView === 'main' && (
                       <HomeView
+                        key="main-view"
                         handleLaunch={handleLaunch} setActiveView={setActiveView}
                         playClickSound={playClickSound} setShowCredits={setShowCredits}
                         isFocusedSection={focusSection === 'menu'}
@@ -405,11 +409,11 @@ function AppContent() {
                         downloadProgress={downloadProgress} downloadingId={downloadingId}
                       />
                     )}
-                    {activeView === 'settings' && <SettingsView vfxEnabled={vfxEnabled} setVfxEnabled={setVfxEnabled} music={musicVol} setMusic={setMusicVol} sfx={sfxVol} setSfx={setSfxVol} layout={layout} setLayout={setLayout} currentTrack={currentTrack} setCurrentTrack={setCurrentTrack} tracks={tracks} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} linuxRunner={linuxRunner} setLinuxRunner={setLinuxRunner} perfBoost={perfBoost} setPerfBoost={setPerfBoost} />}
-                    {activeView === 'versions' && <VersionsView selectedProfile={profile} setSelectedProfile={setProfile} installedVersions={installs} toggleInstall={toggleInstall} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} editions={editions} onAddEdition={addCustomEdition} onDeleteEdition={deleteCustomEdition} onUninstall={handleUninstall} downloadProgress={downloadProgress} downloadingId={downloadingId} />}
-                    {activeView === 'marketplace' && <MarketplaceView playBackSound={playBackSound} setActiveView={setActiveView} />}
-                    {activeView === 'themes' && <ThemesView theme={theme} setTheme={setTheme} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
-                    {activeView === 'skins' && <SkinsView skinUrl={skinUrl} setSkinUrl={setSkinUrl} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
+                    {activeView === 'settings' && <SettingsView key="settings-view" vfxEnabled={vfxEnabled} setVfxEnabled={setVfxEnabled} music={musicVol} setMusic={setMusicVol} sfx={sfxVol} setSfx={setSfxVol} layout={layout} setLayout={setLayout} currentTrack={currentTrack} setCurrentTrack={setCurrentTrack} tracks={tracks} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} linuxRunner={linuxRunner} setLinuxRunner={setLinuxRunner} perfBoost={perfBoost} setPerfBoost={setPerfBoost} />}
+                    {activeView === 'versions' && <VersionsView key="versions-view" selectedProfile={profile} setSelectedProfile={setProfile} installedVersions={installs} toggleInstall={toggleInstall} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} editions={editions} onAddEdition={addCustomEdition} onDeleteEdition={deleteCustomEdition} onUninstall={handleUninstall} downloadProgress={downloadProgress} downloadingId={downloadingId} />}
+                    {activeView === 'marketplace' && <MarketplaceView key="marketplace-view" playBackSound={playBackSound} setActiveView={setActiveView} />}
+                    {activeView === 'themes' && <ThemesView key="themes-view" theme={theme} setTheme={setTheme} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
+                    {activeView === 'skins' && <SkinsView key="skins-view" skinUrl={skinUrl} setSkinUrl={setSkinUrl} playClickSound={playClickSound} playBackSound={playBackSound} setActiveView={setActiveView} />}
                   </AnimatePresence>
                 </div>
               </div>
