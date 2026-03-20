@@ -5,7 +5,7 @@ import SettingsView from "../components/views/SettingsView";
 import VersionsView from "../components/views/VersionsView";
 import ThemesView from "../components/views/ThemesView";
 import SkinsView from "../components/views/SkinsView";
-import MarketplaceView from "../components/views/MarketplaceView";
+import WorkshopView from "../components/views/WorkshopView";
 import SkinViewer from "../components/common/SkinViewer";
 import TeamModal from "../components/modals/TeamModal";
 import PanoramaBackground from "../components/common/PanoramaBackground";
@@ -240,8 +240,8 @@ export default function App() {
                     {activeView === "versions" && (
                       <VersionsView key="versions-view" />
                     )}
-                    {activeView === "marketplace" && (
-                      <MarketplaceView key="marketplace-view" />
+                    {activeView === "workshop" && (
+                      <WorkshopView key="workshop-view" />
                     )}
                     {activeView === "themes" && (
                       <ThemesView key="themes-view" />

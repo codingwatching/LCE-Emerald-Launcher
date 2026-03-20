@@ -2,7 +2,7 @@ import { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useUI, useAudio } from '../../context/LauncherContext';
 
-const MarketplaceView = memo(function MarketplaceView() {
+const WorkshopView = memo(function WorkshopView() {
   const { setActiveView } = useUI();
   const { playBackSound } = useAudio();
   const [backHover, setBackHover] = useState(false);
@@ -21,10 +21,10 @@ const MarketplaceView = memo(function MarketplaceView() {
   return (
     <motion.div tabIndex={0} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center w-full max-w-4xl outline-none -mt-24"
     >
-      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[60%] max-w-[300px] text-center tracking-widest uppercase opacity-80">Marketplace</h2>
+      <h2 className="text-2xl text-white mc-text-shadow mb-4 border-b-2 border-[#373737] pb-2 w-[60%] max-w-[300px] text-center tracking-widest uppercase opacity-80">Workshop</h2>
       
       <div className="w-full max-w-[540px] h-48 mb-6 p-8 shadow-2xl flex items-center justify-center" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
-          <span className="text-[#E0E0E0] text-xl mc-text-shadow tracking-wide">Marketplace support coming soon...</span>
+          <span className="text-[#E0E0E0] text-xl mc-text-shadow tracking-wide">Workshop support coming soon...</span>
       </div>
       
       <button 
@@ -44,4 +44,4 @@ const MarketplaceView = memo(function MarketplaceView() {
   );
 });
 
-export default MarketplaceView;
+export default WorkshopView;

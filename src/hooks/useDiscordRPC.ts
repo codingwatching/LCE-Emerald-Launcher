@@ -45,7 +45,7 @@ export function useDiscordRPC({
           settings: "In Settings",
           themes: "Browsing Themes",
           skins: "Browsing Skins",
-          marketplace: "Browsing Marketplace",
+          workshop: "Browsing Workshop",
         };
         details = tabNames[activeView] || "In Menus";
       }
