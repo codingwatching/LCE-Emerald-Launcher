@@ -1,0 +1,69 @@
+import { useState, useEffect } from "react";
+import { useLocalStorage } from "./useLocalStorage";
+import { TauriService } from "../services/TauriService";
+
+export function useAppConfig() {
+  const [username, setUsername] = useLocalStorage("lce-username", "Steve");
+  const [theme, setTheme] = useLocalStorage("lce-theme", "Modern");
+  const [layout, setLayout] = useLocalStorage("lce-layout", "KBM");
+  const [vfxEnabled, setVfxEnabled] = useLocalStorage("lce-vfx", true);
+  const [rpcEnabled, setRpcEnabled] = useLocalStorage("discord-rpc", true);
+  const [musicVol, setMusicVol] = useLocalStorage("lce-music", 50);
+  const [sfxVol, setSfxVol] = useLocalStorage("lce-sfx", 100);
+  const [isDayTime, setIsDayTime] = useLocalStorage("lce-daytime", true);
+  const [profile, setProfile] = useLocalStorage("lce-profile", "legacy_evolved");
+
+  const [linuxRunner, setLinuxRunner] = useState<string | undefined>();
+  const [perfBoost, setPerfBoost] = useState(false);
+  const [customEditions, setCustomEditions] = useState<any[]>([]);
+
+  useEffect(() => {
+    TauriService.loadConfig().then((config) => {
+      if (config.username) setUsername(config.username);
+      if (config.themeStyleId) setTheme(config.themeStyleId);
+      if (config.linuxRunner) setLinuxRunner(config.linuxRunner);
+      if (config.appleSiliconPerformanceBoost !== undefined)
+        setPerfBoost(config.appleSiliconPerformanceBoost);
+      if (config.customEditions) setCustomEditions(config.customEditions);
+    });
+  }, []);
+
+  const saveConfig = (skinBase64?: string | null) => {
+    TauriService.saveConfig({
+      username,
+      skinBase64: skinBase64 || undefined,
+      themeStyleId: theme,
+      linuxRunner,
+      appleSiliconPerformanceBoost: perfBoost,
+      customEditions,
+    }).catch(console.error);
+  };
+
+  return {
+    username,
+    setUsername,
+    theme,
+    setTheme,
+    layout,
+    setLayout,
+    vfxEnabled,
+    setVfxEnabled,
+    rpcEnabled,
+    setRpcEnabled,
+    musicVol,
+    setMusicVol,
+    sfxVol,
+    setSfxVol,
+    isDayTime,
+    setIsDayTime,
+    profile,
+    setProfile,
+    linuxRunner,
+    setLinuxRunner,
+    perfBoost,
+    setPerfBoost,
+    customEditions,
+    setCustomEditions,
+    saveConfig,
+  };
+}
