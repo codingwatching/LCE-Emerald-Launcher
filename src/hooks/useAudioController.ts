@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const TRACKS = [
   "/music/Blind Spots.ogg",
@@ -33,24 +33,24 @@ export function useAudioController({ musicVol, sfxVol, showIntro, isGameRunning 
   const [splashIndex, setSplashIndex] = useState(-1);
   const musicPausedRef = useRef<{ at: number; track: number } | null>(null);
 
-  const playSfx = (file: string) => {
+  const playSfx = useCallback((file: string) => {
     const a = new Audio(`/sounds/${file}`);
     a.volume = sfxVol / 100;
     a.play().catch(() => {});
-  };
+  }, [sfxVol]);
 
-  const playClickSound = () => playSfx("click.wav");
-  const playBackSound = () => playSfx("back.ogg");
-  const playSplashSound = () => playSfx("orb.ogg");
+  const playClickSound = useCallback(() => playSfx("click.wav"), [playSfx]);
+  const playBackSound = useCallback(() => playSfx("back.ogg"), [playSfx]);
+  const playSplashSound = useCallback(() => playSfx("orb.ogg"), [playSfx]);
 
-  const cycleSplash = () => {
+  const cycleSplash = useCallback(() => {
     playSplashSound();
     let newIndex;
     do {
       newIndex = Math.floor(Math.random() * SPLASHES.length);
     } while (newIndex === splashIndex && SPLASHES.length > 1);
     setSplashIndex(newIndex);
-  };
+  }, [playSplashSound, splashIndex]);
 
   useEffect(() => {
     if (showIntro || audioElement) return;

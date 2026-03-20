@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { memo } from "react";
 
 interface DownloadOverlayProps {
   downloadProgress: number | null;
@@ -6,7 +7,7 @@ interface DownloadOverlayProps {
   editions: any[];
 }
 
-export function DownloadOverlay({ downloadProgress, downloadingId, editions }: DownloadOverlayProps) {
+export const DownloadOverlay = memo(function DownloadOverlay({ downloadProgress, downloadingId, editions }: DownloadOverlayProps) {
   if (downloadProgress === null) return null;
 
   return (
@@ -50,4 +51,4 @@ export function DownloadOverlay({ downloadProgress, downloadingId, editions }: D
       </div>
     </motion.div>
   );
-}
+});

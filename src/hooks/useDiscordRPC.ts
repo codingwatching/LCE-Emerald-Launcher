@@ -54,5 +54,5 @@ export function useDiscordRPC({
     };
 
     updateRPC();
-  }, [rpcEnabled, showIntro, username, profile, activeView, isGameRunning, downloadProgress, downloadingId, editions]);
+  }, [rpcEnabled, showIntro, username, profile, activeView, isGameRunning, Math.floor(downloadProgress || 0), downloadingId, editions]);
 }

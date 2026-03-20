@@ -1,5 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { motion } from "framer-motion";
+import { memo } from "react";
 
 const appWindow = getCurrentWindow();
 
@@ -8,7 +9,7 @@ interface AppHeaderProps {
   uiFade: any;
 }
 
-export function AppHeader({ playClickSound, uiFade }: AppHeaderProps) {
+export const AppHeader = memo(function AppHeader({ playClickSound, uiFade }: AppHeaderProps) {
   return (
     <motion.div
       key="header"
@@ -95,4 +96,4 @@ export function AppHeader({ playClickSound, uiFade }: AppHeaderProps) {
       </div>
     </motion.div>
   );
-}
+});

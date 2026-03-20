@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { motion } from 'framer-motion';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import { TauriService } from '../../services/TauriService';
@@ -20,7 +20,7 @@ const DEFAULT_SKINS: SavedSkin[] = [
   { id: 'peter', name: 'Peter', url: '/Skins/Peter.png' },
 ];
 
-export default function SkinsView({ skinUrl, setSkinUrl, playClickSound, playBackSound, setActiveView }: any) {
+const SkinsView = memo(function SkinsView({ skinUrl, setSkinUrl, playClickSound, playBackSound, setActiveView }: any) {
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -249,4 +249,6 @@ export default function SkinsView({ skinUrl, setSkinUrl, playClickSound, playBac
       </button>
     </motion.div>
   );
-}
+});
+
+export default SkinsView;

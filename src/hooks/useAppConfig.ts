@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocalStorage } from "./useLocalStorage";
 import { TauriService } from "../services/TauriService";
 
@@ -28,7 +28,7 @@ export function useAppConfig() {
     });
   }, []);
 
-  const saveConfig = (skinBase64?: string | null) => {
+  const saveConfig = useCallback((skinBase64?: string | null) => {
     TauriService.saveConfig({
       username,
       skinBase64: skinBase64 || undefined,
@@ -37,7 +37,7 @@ export function useAppConfig() {
       appleSiliconPerformanceBoost: perfBoost,
       customEditions,
     }).catch(console.error);
-  };
+  }, [username, theme, linuxRunner, perfBoost, customEditions]);
 
   return {
     username,

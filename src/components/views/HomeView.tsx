@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 
-export default function HomeView({
+const HomeView = memo(function HomeView({
   handleLaunch,
   setActiveView,
   playClickSound,
@@ -167,4 +167,6 @@ export default function HomeView({
       </div>
     </motion.div>
   );
-}
+});
+
+export default HomeView;

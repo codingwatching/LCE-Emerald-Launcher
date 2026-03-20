@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { TauriService, Runner } from "../../services/TauriService";
 import { usePlatform } from "../../hooks/usePlatform";
 
-export default function SettingsView({
+const SettingsView = memo(function SettingsView({
   vfxEnabled,
   setVfxEnabled,
   music: musicVolume,
@@ -396,4 +396,6 @@ export default function SettingsView({
       })()}
     </motion.div>
   );
-}
+});
+
+export default SettingsView;

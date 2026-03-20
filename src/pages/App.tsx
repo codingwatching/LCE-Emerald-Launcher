@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import HomeView from "../components/views/HomeView";
 import SettingsView from "../components/views/SettingsView";
@@ -64,6 +64,9 @@ function AppContent() {
   const { connected } = useGamepad({
     playSfx: audio.playSfx,
   });
+
+  const onNavigateToSkin = useCallback(() => setFocusSection("skin"), []);
+  const onNavigateToMenu = useCallback(() => setFocusSection("menu"), []);
 
   useEffect(() => {
     appWindow.show();
@@ -263,7 +266,7 @@ function AppContent() {
                       setSkinUrl={setSkinUrl}
                       setActiveView={setActiveView}
                       isFocusedSection={focusSection === "skin"}
-                      onNavigateRight={() => setFocusSection("menu")}
+                      onNavigateRight={onNavigateToMenu}
                     />
                   )}
                 </AnimatePresence>
@@ -278,7 +281,7 @@ function AppContent() {
                         playClickSound={audio.playClickSound}
                         setShowCredits={setShowCredits}
                         isFocusedSection={focusSection === "menu"}
-                        onNavigateLeft={() => setFocusSection("skin")}
+                        onNavigateLeft={onNavigateToSkin}
                         isGameRunning={game.isGameRunning}
                         stopGame={game.stopGame}
                         profile={config.profile}

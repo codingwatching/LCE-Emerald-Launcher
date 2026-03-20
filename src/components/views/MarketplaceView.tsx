@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { motion } from 'framer-motion';
 
-export default function MarketplaceView({ playBackSound, setActiveView }: any) {
+const MarketplaceView = memo(function MarketplaceView({ playBackSound, setActiveView }: any) {
   const [backHover, setBackHover] = useState(false);
 
   useEffect(() => {
@@ -39,4 +39,6 @@ export default function MarketplaceView({ playBackSound, setActiveView }: any) {
       </button>
     </motion.div>
   );
-}
+});
+
+export default MarketplaceView;

@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { motion } from "framer-motion";
 import { TauriService, ThemePalette } from "../../services/TauriService";
 
-export default function ThemesView({
+const ThemesView = memo(function ThemesView({
   theme: currentTheme,
   setTheme,
   playClickSound,
@@ -152,4 +152,6 @@ export default function ThemesView({
       </button>
     </motion.div>
   );
-}
+});
+
+export default ThemesView;

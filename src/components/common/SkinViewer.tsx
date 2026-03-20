@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { SkinViewer as Skinview3D, IdleAnimation } from 'skinview3d';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
@@ -14,7 +14,7 @@ interface SkinViewerProps {
   onNavigateRight: () => void;
 }
 
-export default function SkinViewer({ username, setUsername, playClickSound, skinUrl, setSkinUrl, setActiveView, isFocusedSection, onNavigateRight }: SkinViewerProps) {
+const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSound, skinUrl, setSkinUrl, setActiveView, isFocusedSection, onNavigateRight }: SkinViewerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const viewerRef = useRef<Skinview3D | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -188,4 +188,6 @@ export default function SkinViewer({ username, setUsername, playClickSound, skin
       </div>
     </motion.div>
   );
-}
+});
+
+export default SkinViewer;

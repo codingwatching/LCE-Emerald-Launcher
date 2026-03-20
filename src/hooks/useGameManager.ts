@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { TauriService } from "../services/TauriService";
 
 const BASE_EDITIONS = [
@@ -35,9 +35,9 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const editions = [...BASE_EDITIONS, ...customEditions];
+  const editions = useMemo(() => [...BASE_EDITIONS, ...customEditions], [customEditions]);
 
-  const checkInstalls = async () => {
+  const checkInstalls = useCallback(async () => {
     const results = await Promise.all(
       editions.map(async (e) => {
         const isInstalled = await TauriService.checkGameInstalled(e.id);
@@ -45,7 +45,7 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
       }),
     );
     setInstalls(results.filter((id): id is string => id !== null));
-  };
+  }, [editions]);
 
   useEffect(() => {
     checkInstalls();
@@ -53,9 +53,9 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
     return () => {
       unlistenDownload.then((u) => u());
     };
-  }, [customEditions]);
+  }, [customEditions, checkInstalls]);
 
-  const toggleInstall = async (id: string) => {
+  const toggleInstall = useCallback(async (id: string) => {
     if (downloadingId) return;
     const edition = editions.find((e) => e.id === id);
     if (!edition) return;
@@ -72,14 +72,14 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
       setDownloadProgress(null);
       setDownloadingId(null);
     }
-  };
+  }, [downloadingId, editions, checkInstalls, setProfile]);
 
-  const handleUninstall = async (id: string) => {
+  const handleUninstall = useCallback(async (id: string) => {
     await TauriService.deleteInstance(id);
     await checkInstalls();
-  };
+  }, [checkInstalls]);
 
-  const handleLaunch = async () => {
+  const handleLaunch = useCallback(async () => {
     if (isGameRunning) return;
     setIsGameRunning(true);
     try {
@@ -89,28 +89,28 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
     } finally {
       setIsGameRunning(false);
     }
-  };
+  }, [isGameRunning, profile]);
 
-  const stopGame = async () => {
+  const stopGame = useCallback(async () => {
     try {
       await TauriService.stopGame(profile);
       setIsGameRunning(false);
     } catch (e) {
       console.error(e);
     }
-  };
+  }, [profile]);
 
-  const addCustomEdition = (edition: { name: string; desc: string; url: string }) => {
+  const addCustomEdition = useCallback((edition: { name: string; desc: string; url: string }) => {
     const id = `custom_${Date.now()}`;
     const newEdition = { ...edition, id };
     setCustomEditions([...customEditions, newEdition]);
     return id;
-  };
+  }, [customEditions, setCustomEditions]);
 
-  const deleteCustomEdition = (id: string) => {
+  const deleteCustomEdition = useCallback((id: string) => {
     setCustomEditions(customEditions.filter((e) => e.id !== id));
     TauriService.deleteInstance(id).catch(console.error);
-  };
+  }, [customEditions, setCustomEditions]);
 
   return {
     installs,

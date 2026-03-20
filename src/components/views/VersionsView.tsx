@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { motion } from "framer-motion";
 import { TauriService } from "../../services/TauriService";
 import CustomTUModal from "../modals/CustomTUModal";
 
-export default function VersionsView({
+const VersionsView = memo(function VersionsView({
   selectedProfile,
   setSelectedProfile,
   installedVersions,
@@ -453,4 +453,6 @@ export default function VersionsView({
       />
     </motion.div>
   );
-}
+});
+
+export default VersionsView;
