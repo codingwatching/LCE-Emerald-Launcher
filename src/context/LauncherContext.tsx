@@ -6,6 +6,7 @@ import { useGameManager } from "../hooks/useGameManager";
 import { useSkinSync } from "../hooks/useSkinSync";
 import { useDiscordRPC } from "../hooks/useDiscordRPC";
 import { useGamepad } from "../hooks/useGamepad";
+import { useUpdateCheck } from "../hooks/useUpdateCheck";
 
 interface UIContextType {
   activeView: string;
@@ -24,6 +25,8 @@ interface UIContextType {
   onNavigateToSkin: () => void;
   onNavigateToMenu: () => void;
   connected: boolean;
+  updateMessage: string | null;
+  clearUpdateMessage: () => void;
 }
 const UIContext = createContext<UIContextType | undefined>(undefined);
 
@@ -40,6 +43,8 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
   const [isWindowVisible, setIsWindowVisible] = useState(true);
   const [showCredits, setShowCredits] = useState(false);
   const [focusSection, setFocusSection] = useState<"menu" | "skin">("menu");
+
+  const { updateMessage, clearUpdateMessage } = useUpdateCheck();
 
   const configRaw = useAppConfig();
   const skinSync = useSkinSync();
@@ -125,8 +130,9 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
     logoAnimDone, setLogoAnimDone, isUiHidden, setIsUiHidden,
     isWindowVisible,
     showCredits, setShowCredits, focusSection, setFocusSection,
-    onNavigateToSkin, onNavigateToMenu, connected
-  }), [activeView, showIntro, logoAnimDone, isUiHidden, isWindowVisible, showCredits, focusSection, onNavigateToSkin, onNavigateToMenu, connected]);
+    onNavigateToSkin, onNavigateToMenu, connected,
+    updateMessage, clearUpdateMessage
+  }), [activeView, showIntro, logoAnimDone, isUiHidden, isWindowVisible, showCredits, focusSection, onNavigateToSkin, onNavigateToMenu, connected, updateMessage, clearUpdateMessage]);
 
   return (
     <UIContext.Provider value={uiValue}>

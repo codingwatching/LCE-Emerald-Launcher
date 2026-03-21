@@ -119,4 +119,8 @@ export class TauriService {
   static onMacosProgress(callback: (payload: MacOSSetupProgress) => void) {
     return listen<MacOSSetupProgress>('macos-setup-progress', (event) => callback(event.payload));
   }
+
+  static async openUrl(url: string): Promise<void> {
+    return invoke('plugin:opener|open_url', { url });
+  }
 }

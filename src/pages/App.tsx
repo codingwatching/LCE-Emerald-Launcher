@@ -15,6 +15,7 @@ import { DownloadOverlay } from "../components/layout/DownloadOverlay";
 import { AchievementToast } from "../components/common/AchievementToast";
 import { useUI, useConfig, useAudio, useGame, useSkin } from "../context/LauncherContext";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { TauriService } from "../services/TauriService";
 
 const appWindow = getCurrentWindow();
 
@@ -23,7 +24,7 @@ export default function App() {
     showIntro, setShowIntro, logoAnimDone, setLogoAnimDone,
     activeView, setActiveView, isUiHidden, setIsUiHidden,
     showCredits, setShowCredits, focusSection,
-    onNavigateToMenu
+    onNavigateToMenu, updateMessage, clearUpdateMessage
   } = useUI();
 
   const config = useConfig();
@@ -94,6 +95,14 @@ export default function App() {
       <AchievementToast
         message={game.error}
         onClose={() => game.setError(null)}
+      />
+
+      <AchievementToast
+        message={updateMessage}
+        onClose={clearUpdateMessage}
+        onClick={() => TauriService.openUrl("https://emerald-legacy-launcher.github.io/")}
+        title="Update Available!"
+        variant="update"
       />
 
       <AnimatePresence>
