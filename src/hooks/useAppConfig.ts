@@ -13,6 +13,7 @@ export function useAppConfig() {
   const [isDayTime, setIsDayTime] = useLocalStorage("lce-daytime", true);
   const [profile, setProfile] = useLocalStorage("lce-profile", "legacy_evolved");
   const [legacyMode, setLegacyMode] = useLocalStorage("lce-legacy-mode", false);
+  const [keepLauncherOpen, setKeepLauncherOpen] = useLocalStorage("lce-keep-open", false);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [linuxRunner, setLinuxRunner] = useState<string | undefined>();
@@ -27,6 +28,7 @@ export function useAppConfig() {
       if (config.appleSiliconPerformanceBoost !== undefined)
         setPerfBoost(config.appleSiliconPerformanceBoost);
       if (config.customEditions) setCustomEditions(config.customEditions);
+      if (config.keepLauncherOpen !== undefined) setKeepLauncherOpen(config.keepLauncherOpen);
       setIsLoaded(true);
     });
   }, []);
@@ -40,8 +42,9 @@ export function useAppConfig() {
       appleSiliconPerformanceBoost: perfBoost,
       profile,
       customEditions,
+      keepLauncherOpen,
     }).catch(console.error);
-  }, [username, theme, linuxRunner, perfBoost, profile, customEditions]);
+  }, [username, theme, linuxRunner, perfBoost, profile, customEditions, keepLauncherOpen]);
 
   return {
     username,
@@ -62,6 +65,8 @@ export function useAppConfig() {
     setIsDayTime,
     legacyMode,
     setLegacyMode,
+    keepLauncherOpen,
+    setKeepLauncherOpen,
     profile,
     setProfile,
     linuxRunner,

@@ -53,6 +53,7 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
     setProfile: configRaw.setProfile,
     customEditions: configRaw.customEditions,
     setCustomEditions: configRaw.setCustomEditions,
+    keepLauncherOpen: configRaw.keepLauncherOpen,
   });
   const audioRaw = useAudioController({
     musicVol: configRaw.musicVol,
@@ -66,7 +67,7 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
     configRaw.username, configRaw.theme, configRaw.layout, configRaw.vfxEnabled,
     configRaw.rpcEnabled, configRaw.musicVol, configRaw.sfxVol, configRaw.isDayTime,
     configRaw.profile, configRaw.linuxRunner, configRaw.perfBoost, configRaw.customEditions,
-    configRaw.legacyMode
+    configRaw.legacyMode, configRaw.keepLauncherOpen
   ]);
 
   const game = useMemo(() => gameRaw, [

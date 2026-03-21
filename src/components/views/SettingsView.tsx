@@ -6,7 +6,7 @@ import { useUI, useConfig, useAudio, useGame } from "../../context/LauncherConte
 
 const SettingsView = memo(function SettingsView() {
   const { setActiveView } = useUI();
-  const { vfxEnabled, setVfxEnabled, musicVol: musicVolume, setMusicVol: setMusicVolume, sfxVol: sfxVolume, setSfxVol: setSfxVolume, layout, setLayout, linuxRunner, setLinuxRunner, perfBoost, setPerfBoost, rpcEnabled, setRpcEnabled, legacyMode, setLegacyMode } = useConfig();
+  const { vfxEnabled, setVfxEnabled, musicVol: musicVolume, setMusicVol: setMusicVolume, sfxVol: sfxVolume, setSfxVol: setSfxVolume, layout, setLayout, linuxRunner, setLinuxRunner, perfBoost, setPerfBoost, rpcEnabled, setRpcEnabled, legacyMode, setLegacyMode, keepLauncherOpen, setKeepLauncherOpen } = useConfig();
   const { currentTrack, setCurrentTrack, tracks, playClickSound, playBackSound } = useAudio();
   const { isGameRunning, stopGame, isRunnerDownloading, runnerDownloadProgress, downloadRunner } = useGame();
   const { isLinux, isMac } = usePlatform();
@@ -45,6 +45,11 @@ const SettingsView = memo(function SettingsView() {
   const handleLegacyToggle = () => {
     playClickSound();
     setLegacyMode(!legacyMode);
+  };
+  
+  const handleKeepOpenToggle = () => {
+    playClickSound();
+    setKeepLauncherOpen(!keepLauncherOpen);
   };
 
   const handleRunnerToggle = () => {
@@ -145,6 +150,13 @@ const SettingsView = memo(function SettingsView() {
       type: "button",
       onClick: handleLegacyToggle,
     });
+    
+    items.push({
+      id: "keep_open",
+      label: `Keep Launcher Open: ${keepLauncherOpen ? "ON" : "OFF"}`,
+      type: "button",
+      onClick: handleKeepOpenToggle,
+    });
 
     items.push({
       id: "layout",
@@ -228,12 +240,14 @@ const SettingsView = memo(function SettingsView() {
     handleMacosSetup,
     handleRpcToggle,
     handleLegacyToggle,
+    handleKeepOpenToggle,
     stopGame,
     playBackSound,
     setActiveView,
     setMusicVolume,
     setSfxVolume,
     setVfxEnabled,
+    keepLauncherOpen,
   ]);
 
   useEffect(() => {

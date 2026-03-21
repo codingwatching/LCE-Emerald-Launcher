@@ -50,6 +50,7 @@ pub struct AppConfig {
     pub theme_palette_id: Option<String>,
     pub apple_silicon_performance_boost: Option<bool>,
     pub custom_editions: Option<Vec<CustomEdition>>,
+    pub keep_launcher_open: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -179,6 +180,7 @@ fn load_config(app: AppHandle) -> AppConfig {
         theme_palette_id: None,
         apple_silicon_performance_boost: None,
         custom_editions: None,
+        keep_launcher_open: None,
     }
 }
 

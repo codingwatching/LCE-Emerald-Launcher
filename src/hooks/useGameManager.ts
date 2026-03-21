@@ -30,9 +30,10 @@ interface GameManagerProps {
   setProfile: (id: string) => void;
   customEditions: any[];
   setCustomEditions: (editions: any[]) => void;
+  keepLauncherOpen: boolean;
 }
 
-export function useGameManager({ profile, setProfile, customEditions, setCustomEditions }: GameManagerProps) {
+export function useGameManager({ profile, setProfile, customEditions, setCustomEditions, keepLauncherOpen }: GameManagerProps) {
   const [installs, setInstalls] = useState<string[]>([]);
   const [isGameRunning, setIsGameRunning] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState<number | null>(null);
@@ -110,7 +111,9 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
     setError(null);
     setIsGameRunning(true);
     try {
-      await appWindow.hide();
+      if (!keepLauncherOpen) {
+        await appWindow.hide();
+      }
       await TauriService.launchGame(profile, []);
     } catch (e: any) {
       console.error(e);

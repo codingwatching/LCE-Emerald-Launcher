@@ -30,6 +30,7 @@ export interface AppConfig {
   appleSiliconPerformanceBoost?: boolean;
   customEditions?: CustomEdition[];
   profile?: string;
+  keepLauncherOpen?: boolean;
 }
 
 export interface ThemePalette {
