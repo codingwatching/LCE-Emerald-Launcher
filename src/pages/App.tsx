@@ -127,49 +127,53 @@ export default function App() {
             <AnimatePresence>
               {logoAnimDone && (
                 <>
-                  <motion.div
-                    key="hideBtn"
-                    {...uiFade}
-                    className="absolute top-14 left-8 z-50"
-                  >
-                    <button
-                      onClick={() => {
-                        audio.playClickSound();
-                        setIsUiHidden(!isUiHidden);
-                      }}
-                      className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
+                  {!config.legacyMode && (
+                    <motion.div
+                      key="hideBtn"
+                      {...uiFade}
+                      className="absolute top-14 left-8 z-50"
                     >
-                      <img
-                        src={isUiHidden ? "/images/Unhide_UI_Button.png" : "/images/Hide_UI_Button.png"}
-                        className="w-10 h-10 cursor-pointer object-contain"
-                        style={{ imageRendering: "pixelated" }}
-                      />
-                    </button>
-                  </motion.div>
+                      <button
+                        onClick={() => {
+                          audio.playClickSound();
+                          setIsUiHidden(!isUiHidden);
+                        }}
+                        className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
+                      >
+                        <img
+                          src={isUiHidden ? "/images/Unhide_UI_Button.png" : "/images/Hide_UI_Button.png"}
+                          className="w-10 h-10 cursor-pointer object-contain"
+                          style={{ imageRendering: "pixelated" }}
+                        />
+                      </button>
+                    </motion.div>
+                  )}
 
-                  <motion.div
-                    key="dayToggle"
-                    {...uiFade}
-                    className="absolute bottom-6 right-8 z-50 flex items-center gap-3"
-                  >
-                    <span className="text-[#E0E0E0] text-[10px] mc-text-shadow tracking-widest uppercase opacity-70 mt-1">
-                      {config.isDayTime ? "Day" : "Night"}
-                    </span>
-                    <button
-                      onClick={() => {
-                        audio.playClickSound();
-                        config.setIsDayTime(!config.isDayTime);
-                      }}
-                      className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
+                  {!config.legacyMode && (
+                    <motion.div
+                      key="dayToggle"
+                      {...uiFade}
+                      className="absolute bottom-6 right-8 z-50 flex items-center gap-3"
                     >
-                      <img
-                        src={config.isDayTime ? "/images/Day_Toggle.png" : "/images/Night_Toggle.png"}
-                        alt="Toggle Time"
-                        className="w-12 h-12 cursor-pointer block object-contain"
-                        style={{ imageRendering: "pixelated" }}
-                      />
-                    </button>
-                  </motion.div>
+                      <span className="text-[#E0E0E0] text-[10px] mc-text-shadow tracking-widest uppercase opacity-70 mt-1">
+                        {config.isDayTime ? "Day" : "Night"}
+                      </span>
+                      <button
+                        onClick={() => {
+                          audio.playClickSound();
+                          config.setIsDayTime(!config.isDayTime);
+                        }}
+                        className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
+                      >
+                        <img
+                          src={config.isDayTime ? "/images/Day_Toggle.png" : "/images/Night_Toggle.png"}
+                          alt="Toggle Time"
+                          className="w-12 h-12 cursor-pointer block object-contain"
+                          style={{ imageRendering: "pixelated" }}
+                        />
+                      </button>
+                    </motion.div>
+                  )}
                 </>
               )}
             </AnimatePresence>

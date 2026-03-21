@@ -4,7 +4,7 @@ import { useUI, useConfig, useAudio, useGame } from "../../context/LauncherConte
 
 const HomeView = memo(function HomeView() {
   const { setActiveView, setShowCredits, focusSection, onNavigateToSkin } = useUI();
-  const { profile } = useConfig();
+  const { profile, legacyMode } = useConfig();
   const { playClickSound, playSfx } = useAudio();
   const { handleLaunch, isGameRunning, stopGame, editions, installs, toggleInstall, downloadProgress, downloadingId } = useGame();
 
@@ -110,56 +110,58 @@ const HomeView = memo(function HomeView() {
           {btn.label}
         </button>
       ))}
-      <div className="pt-4 flex flex-col items-center w-full gap-3">
-        <div className="flex gap-8">
-          <a
-            href="https://discord.gg/YBy7kbnR4m"
-            target="_blank"
-            rel="noopener noreferrer"
+      {!legacyMode && (
+        <div className="pt-4 flex flex-col items-center w-full gap-3">
+          <div className="flex gap-8">
+            <a
+              href="https://discord.gg/YBy7kbnR4m"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (isFocusedSection) playClickSound();
+              }}
+              className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
+            >
+              <img
+                src="/images/discord.png"
+                className="w-16 h-16 drop-shadow-md object-contain"
+                style={{ imageRendering: "pixelated" }}
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+            <a
+              href="https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (isFocusedSection) playClickSound();
+              }}
+              className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
+            >
+              <img
+                src="/images/github.png"
+                className="w-16 h-16 drop-shadow-md object-contain"
+                style={{ imageRendering: "pixelated" }}
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
+          </div>
+          <div className="border-b-[3px] border-[#A0A0A0] w-48 opacity-60" />
+          <button
             onClick={() => {
-              if (isFocusedSection) playClickSound();
+              if (isFocusedSection) {
+                playSfx("orb.ogg");
+                setShowCredits(true);
+              }
             }}
-            className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
+            className={`text-white hover:text-[#FFFF55] text-xl mc-text-shadow tracking-widest transition-colors mt-1 bg-transparent border-none outline-none ${!isFocusedSection ? "cursor-default pointer-events-none" : ""}`}
           >
-            <img
-              src="/images/discord.png"
-              className="w-16 h-16 drop-shadow-md object-contain"
-              style={{ imageRendering: "pixelated" }}
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
-          <a
-            href="https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              if (isFocusedSection) playClickSound();
-            }}
-            className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
-          >
-            <img
-              src="/images/github.png"
-              className="w-16 h-16 drop-shadow-md object-contain"
-              style={{ imageRendering: "pixelated" }}
-              loading="lazy"
-              decoding="async"
-            />
-          </a>
+            EMERALD TEAM
+          </button>
         </div>
-        <div className="border-b-[3px] border-[#A0A0A0] w-48 opacity-60" />
-        <button
-          onClick={() => {
-            if (isFocusedSection) {
-              playSfx("orb.ogg");
-              setShowCredits(true);
-            }
-          }}
-          className={`text-white hover:text-[#FFFF55] text-xl mc-text-shadow tracking-widest transition-colors mt-1 bg-transparent border-none outline-none ${!isFocusedSection ? "cursor-default pointer-events-none" : ""}`}
-        >
-          EMERALD TEAM
-        </button>
-      </div>
+      )}
     </motion.div>
   );
 });

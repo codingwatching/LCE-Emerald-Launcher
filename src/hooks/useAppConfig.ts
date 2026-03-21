@@ -12,6 +12,7 @@ export function useAppConfig() {
   const [sfxVol, setSfxVol] = useLocalStorage("lce-sfx", 100);
   const [isDayTime, setIsDayTime] = useLocalStorage("lce-daytime", true);
   const [profile, setProfile] = useLocalStorage("lce-profile", "legacy_evolved");
+  const [legacyMode, setLegacyMode] = useLocalStorage("lce-legacy-mode", false);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [linuxRunner, setLinuxRunner] = useState<string | undefined>();
@@ -59,6 +60,8 @@ export function useAppConfig() {
     setSfxVol,
     isDayTime,
     setIsDayTime,
+    legacyMode,
+    setLegacyMode,
     profile,
     setProfile,
     linuxRunner,

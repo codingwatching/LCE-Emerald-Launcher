@@ -6,7 +6,7 @@ import { useUI, useConfig, useAudio, useGame } from "../../context/LauncherConte
 
 const SettingsView = memo(function SettingsView() {
   const { setActiveView } = useUI();
-  const { vfxEnabled, setVfxEnabled, musicVol: musicVolume, setMusicVol: setMusicVolume, sfxVol: sfxVolume, setSfxVol: setSfxVolume, layout, setLayout, linuxRunner, setLinuxRunner, perfBoost, setPerfBoost, rpcEnabled, setRpcEnabled } = useConfig();
+  const { vfxEnabled, setVfxEnabled, musicVol: musicVolume, setMusicVol: setMusicVolume, sfxVol: sfxVolume, setSfxVol: setSfxVolume, layout, setLayout, linuxRunner, setLinuxRunner, perfBoost, setPerfBoost, rpcEnabled, setRpcEnabled, legacyMode, setLegacyMode } = useConfig();
   const { currentTrack, setCurrentTrack, tracks, playClickSound, playBackSound } = useAudio();
   const { isGameRunning, stopGame, isRunnerDownloading, runnerDownloadProgress, downloadRunner } = useGame();
   const { isLinux, isMac } = usePlatform();
@@ -40,6 +40,11 @@ const SettingsView = memo(function SettingsView() {
   const handleRpcToggle = () => {
     playClickSound();
     setRpcEnabled(!rpcEnabled);
+  };
+  
+  const handleLegacyToggle = () => {
+    playClickSound();
+    setLegacyMode(!legacyMode);
   };
 
   const handleRunnerToggle = () => {
@@ -135,6 +140,13 @@ const SettingsView = memo(function SettingsView() {
     });
 
     items.push({
+      id: "legacy",
+      label: `Legacy Mode: ${legacyMode ? "ON" : "OFF"}`,
+      type: "button",
+      onClick: handleLegacyToggle,
+    });
+
+    items.push({
       id: "layout",
       label: `Layout: ${layout}`,
       type: "button",
@@ -205,21 +217,17 @@ const SettingsView = memo(function SettingsView() {
     return items;
   }, [
     musicVolume,
-    sfxVolume,
-    trackName,
-    vfxEnabled,
-    layout,
-    isLinux,
-    isMac,
-    selectedRunnerName,
     perfBoost,
     isGameRunning,
+    legacyMode,
     handleTrackToggle,
     handleVfxToggle,
     handleLayoutToggle,
     handleRunnerToggle,
     handlePerfToggle,
     handleMacosSetup,
+    handleRpcToggle,
+    handleLegacyToggle,
     stopGame,
     playBackSound,
     setActiveView,

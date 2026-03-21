@@ -56,7 +56,8 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
   const config = useMemo(() => configRaw, [
     configRaw.username, configRaw.theme, configRaw.layout, configRaw.vfxEnabled,
     configRaw.rpcEnabled, configRaw.musicVol, configRaw.sfxVol, configRaw.isDayTime,
-    configRaw.profile, configRaw.linuxRunner, configRaw.perfBoost, configRaw.customEditions
+    configRaw.profile, configRaw.linuxRunner, configRaw.perfBoost, configRaw.customEditions,
+    configRaw.legacyMode
   ]);
 
   const game = useMemo(() => gameRaw, [

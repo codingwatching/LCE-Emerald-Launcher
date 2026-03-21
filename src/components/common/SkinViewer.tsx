@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, memo } from 'react';
 import { motion } from 'framer-motion';
 import { SkinViewer as Skinview3D, IdleAnimation } from 'skinview3d';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useConfig } from '../../context/LauncherContext';
 
 interface SkinViewerProps {
   username: string;
@@ -19,6 +20,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
   const viewerRef = useRef<Skinview3D | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = useState(0);
+  const { legacyMode } = useConfig();
 
   const [showLayers, setShowLayers] = useLocalStorage('lce-show-layers', true);
   const showLayersRef = useRef(showLayers);
@@ -87,7 +89,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
 
   useEffect(() => {
     if (!isFocusedSection) {
-      setFocusIndex(0);
+      setFocusIndex(legacyMode ? 1 : 0);
       return;
     }
 
@@ -102,7 +104,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
       } else if (e.key === 'ArrowDown') {
         setFocusIndex(prev => (prev < 3 ? prev + 1 : prev));
       } else if (e.key === 'ArrowUp') {
-        setFocusIndex(prev => (prev > 0 ? prev - 1 : prev));
+        setFocusIndex(prev => (prev > (legacyMode ? 1 : 0) ? prev - 1 : prev));
       } else if (e.key === 'Enter') {
         if (focusIndex === 0) {
           (containerRef.current?.querySelector('input') as HTMLElement)?.focus();
@@ -137,24 +139,28 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
-      className="absolute left-16 top-[42%] -translate-y-1/2 flex flex-col items-center gap-1 outline-none z-10"
+      className={`absolute ${legacyMode ? 'left-[calc(25vw-159px)]' : 'left-16'} ${legacyMode ? 'top-1/2' : 'top-[42%]'} -translate-y-1/2 flex flex-col items-center gap-1 outline-none z-10`}
     >
-      <div className={`bg-black/20 flex justify-center items-center mb-2 px-2 py-1 rounded-sm border-2 transition-colors ${isFocusedSection && focusIndex === 0 ? 'border-[#FFFF55]' : 'border-transparent'}`} data-focus="0" tabIndex={0}>
-        <input
-          type="text" value={username} maxLength={16}
-          style={{ width: `${Math.max(username.length, 3) + 2}ch` }}
-          onChange={(e) => setUsername(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === 'ArrowDown') {
-              e.currentTarget.blur();
-              e.stopPropagation();
-            }
-          }}
-          className="bg-transparent text-white focus:text-[#FFFF55] outline-none border-none text-center font-['Mojangles'] mc-text-shadow tracking-widest text-xl cursor-default"
-        />
-      </div>
-      <canvas ref={canvasRef} className="drop-shadow-[0_8px_8px_rgba(0,0,0,0.8)] cursor-ew-resize outline-none" />
-      <div className="flex gap-4 mt-2 items-center">
+      {!legacyMode && (
+        <div className={`bg-black/20 flex justify-center items-center ${legacyMode ? 'mb-0' : 'mb-2'} px-2 py-1 rounded-sm border-2 transition-colors ${isFocusedSection && focusIndex === 0 ? 'border-[#FFFF55]' : 'border-transparent'}`} data-focus="0" tabIndex={0}>
+          <input
+            type="text" value={username} maxLength={16}
+            style={{ width: `${Math.max(username.length, 3) + 2}ch` }}
+            onChange={(e) => setUsername(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.currentTarget.blur();
+                e.stopPropagation();
+              }
+            }}
+            className="bg-transparent text-white focus:text-[#FFFF55] outline-none border-none text-center font-['Mojangles'] mc-text-shadow tracking-widest text-xl cursor-default"
+          />
+        </div>
+      )}
+      {!legacyMode && (
+        <canvas ref={canvasRef} className="drop-shadow-[0_8px_8px_rgba(0,0,0,0.8)] cursor-ew-resize outline-none" />
+      )}
+      <div className={`flex ${legacyMode ? 'flex-col gap-2 mt-4' : 'flex-row gap-4 mt-2'} items-center`}>
         <button
           data-focus="1" tabIndex={0}
           onMouseEnter={() => isFocusedSection && setFocusIndex(1)}
