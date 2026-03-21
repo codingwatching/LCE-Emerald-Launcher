@@ -105,15 +105,15 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
         if (focusIndex === 2 || focusIndex === 3) setFocusIndex(prev => prev - 1);
       } else if (e.key === 'ArrowDown') {
         if (legacyMode) {
-          setFocusIndex(prev => (prev === 1 ? 3 : prev));
+          return;
         } else {
           setFocusIndex(prev => (prev < 3 ? prev + 1 : prev));
         }
       } else if (e.key === 'ArrowUp') {
         if (legacyMode) {
-          setFocusIndex(prev => (prev === 3 ? 1 : prev));
+          return;
         } else {
-          setFocusIndex(prev => (prev > (legacyMode ? 1 : 0) ? prev - 1 : prev));
+          setFocusIndex(prev => (prev > 0 ? prev - 1 : prev));
         }
       } else if (e.key === 'Enter') {
         if (focusIndex === 0) {
@@ -193,16 +193,18 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
             <img src="/images/Layer_Icon.png" alt="Layers" className="w-8 h-8 object-contain" style={{ imageRendering: 'pixelated' }} />
           </button>
         )}
-        <button
-          data-focus="3" tabIndex={0}
-          onMouseEnter={() => isFocusedSection && setFocusIndex(3)}
-          onClick={() => { playClickSound(); setSkinUrl('/images/Default.png'); }}
-          className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 3 ? 'scale-110' : ''}`}
-          style={isFocusedSection && focusIndex === 3 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
-          title="Reset to Default"
-        >
-          <img src="/images/Trash_Bin_Icon.png" alt="Delete" className="w-8 h-8 object-contain brightness-200" style={{ imageRendering: 'pixelated' }} />
-        </button>
+        {!legacyMode && (
+          <button
+            data-focus="3" tabIndex={0}
+            onMouseEnter={() => isFocusedSection && setFocusIndex(3)}
+            onClick={() => { playClickSound(); setSkinUrl('/images/Default.png'); }}
+            className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 3 ? 'scale-110' : ''}`}
+            style={isFocusedSection && focusIndex === 3 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
+            title="Reset to Default"
+          >
+            <img src="/images/Trash_Bin_Icon.png" alt="Delete" className="w-8 h-8 object-contain brightness-200" style={{ imageRendering: 'pixelated' }} />
+          </button>
+        )}
       </div>
     </motion.div>
   );
