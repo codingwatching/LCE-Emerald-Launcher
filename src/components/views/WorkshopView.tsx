@@ -23,7 +23,7 @@ const WorkshopView = memo(function WorkshopView() {
     >
       <h2 className="text-2xl text-white mc-text-shadow mt-2 mb-4 border-b-2 border-[#373737] pb-2 w-[60%] max-w-[300px] text-center tracking-widest uppercase opacity-80">Workshop</h2>
       
-      <div className="w-full max-w-[540px] h-48 mb-6 p-8 shadow-2xl flex items-center justify-center" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
+      <div className="w-full max-w-135 h-48 mb-6 p-8 shadow-2xl flex items-center justify-center" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
           <span className="text-[#E0E0E0] text-xl mc-text-shadow tracking-wide">Workshop support coming soon...</span>
       </div>
       

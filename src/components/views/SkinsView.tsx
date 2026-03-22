@@ -167,11 +167,11 @@ const SkinsView = memo(function SkinsView() {
 
   return (
     <motion.div ref={containerRef} tabIndex={-1} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="flex flex-col items-center w-full max-w-3xl outline-none">
-      <h2 className="text-2xl text-white mc-text-shadow mt-2 mb-4 border-b-2 border-[#373737] pb-2 w-[60%] max-w-[300px] text-center tracking-widest uppercase opacity-80 font-bold">Skin Library</h2>
+      <h2 className="text-2xl text-white mc-text-shadow mt-2 mb-4 border-b-2 border-[#373737] pb-2 w-[60%] max-w-75 text-center tracking-widest uppercase opacity-80 font-bold">Skin Library</h2>
 
-      <div className="w-full max-w-[640px] h-[340px] mb-4 p-5 shadow-2xl flex flex-col relative" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
+      <div className="w-full max-w-160 h-85 mb-4 p-5 shadow-2xl flex flex-col relative" style={{ backgroundImage: "url('/images/frame_background.png')", backgroundSize: "100% 100%", imageRendering: "pixelated" }}>
 
-        <div className="w-full flex items-center border-b-2 border-[#373737] pb-4 mb-4 relative min-h-[40px]">
+        <div className="w-full flex items-center border-b-2 border-[#373737] pb-4 mb-4 relative min-h-10">
           <div className="absolute left-0 right-0 flex justify-center gap-4 items-center">
             <button
               data-index="0"
@@ -228,7 +228,7 @@ const SkinsView = memo(function SkinsView() {
                   onClick={() => handleSkinSelect(skin)}
                   className={`w-16 h-16 bg-black/40 border-2 shadow-inner relative cursor-pointer overflow-hidden transition-colors outline-none ${(isActive || isFocused) ? 'border-[#FFFF55]' : 'border-[#373737] hover:border-[#A0A0A0]'}`}
                 >
-                  <img src={skin.url} alt={skin.name} className="absolute max-w-none" style={{ width: '800%', height: 'auto', left: '-100%', top: '-100%', imageRendering: 'pixelated' }} loading="lazy" decoding="async" />
+                  <img src={skin.url} draggable={false} alt={skin.name} className="absolute max-w-none" style={{ width: '800%', height: 'auto', left: '-100%', top: '-100%', imageRendering: 'pixelated' }} loading="lazy" decoding="async" />
                 </div>
                 <input
                   type="text" value={skin.name} maxLength={16}
