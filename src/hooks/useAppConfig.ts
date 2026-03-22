@@ -29,6 +29,7 @@ export function useAppConfig() {
       if (config.appleSiliconPerformanceBoost !== undefined)
         setPerfBoost(config.appleSiliconPerformanceBoost);
       if (config.customEditions) setCustomEditions(config.customEditions);
+      if (config.profile) setProfile(config.profile);
       if (config.keepLauncherOpen !== undefined) setKeepLauncherOpen(config.keepLauncherOpen);
       if (config.enableTrayIcon !== undefined) setEnableTrayIcon(config.enableTrayIcon);
       setIsLoaded(true);

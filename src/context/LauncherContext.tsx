@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useAppConfig } from "../hooks/useAppConfig";
+import { TauriService } from "../services/TauriService";
 import { useAudioController } from "../hooks/useAudioController";
 import { useGameManager } from "../hooks/useGameManager";
 import { useSkinSync } from "../hooks/useSkinSync";
@@ -73,7 +74,7 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
   const game = useMemo(() => gameRaw, [
     gameRaw.installs, gameRaw.isGameRunning, gameRaw.downloadProgress,
     gameRaw.downloadingId, gameRaw.editions, gameRaw.isRunnerDownloading,
-    gameRaw.runnerDownloadProgress, gameRaw.error
+    gameRaw.runnerDownloadProgress, gameRaw.error, configRaw.profile
   ]);
 
   const audio = useMemo(() => audioRaw, [
@@ -103,6 +104,12 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
       audioRaw.setSplashIndex(-1);
     }
   }, [activeView]);
+
+  useEffect(() => {
+    if (config.isLoaded && config.profile) {
+      TauriService.syncDlc(config.profile).catch(console.error);
+    }
+  }, [config.profile, config.isLoaded]);
 
   useEffect(() => {
     if (config.isLoaded) {

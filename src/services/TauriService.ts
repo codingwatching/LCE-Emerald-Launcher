@@ -110,6 +110,10 @@ export class TauriService {
     return invoke('stop_game', { instanceId });
   }
 
+  static async syncDlc(instanceId: string): Promise<void> {
+    return invoke('sync_dlc', { instanceId });
+  }
+
   static async updateTrayIcon(visible: boolean): Promise<void> {
     return invoke('update_tray_icon', { visible });
   }

@@ -50,6 +50,7 @@ pub struct AppConfig {
     pub theme_palette_id: Option<String>,
     pub apple_silicon_performance_boost: Option<bool>,
     pub custom_editions: Option<Vec<CustomEdition>>,
+    pub profile: Option<String>,
     pub keep_launcher_open: Option<bool>,
     pub enable_tray_icon: Option<bool>,
 }
@@ -181,6 +182,7 @@ fn load_config(app: AppHandle) -> AppConfig {
         theme_palette_id: None,
         apple_silicon_performance_boost: None,
         custom_editions: None,
+        profile: Some("legacy_evolved".into()),
         keep_launcher_open: None,
         enable_tray_icon: Some(true),
     }
@@ -613,7 +615,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
                 let file_name = entry.file_name();
                 let name_str = file_name.to_string_lossy();
 
-                let keep_list = ["Windows64", "uid.dat", "username.txt", "settings.dat", "servers.dat", "servers.txt", "server.properties", "Common", "options.txt", "servers.db"];
+                let keep_list = ["Windows64", "Windows64Media", "uid.dat", "username.txt", "settings.dat", "servers.dat", "servers.txt", "server.properties", "Common", "options.txt", "servers.db"];
                 if !keep_list.contains(&name_str.as_ref()) {
                     let path = entry.path();
                     if path.is_dir() {
@@ -796,6 +798,75 @@ fn ensure_server_list(instance_dir: &PathBuf, servers: Vec<McServer>) {
     }
 }
 
+fn perform_dlc_sync(app: &AppHandle, instance_dir: &PathBuf) -> Result<(), String> {
+    let mut dlc_src = None;
+    let root = get_app_dir(app);
+    
+    use tauri::path::BaseDirectory;
+    if let Ok(p) = app.path().resolve("resources/DLC", BaseDirectory::Resource) {
+        if p.exists() {
+            dlc_src = Some(p);
+        } else {
+            if let Ok(p2) = app.path().resolve("DLC", BaseDirectory::Resource) {
+                if p2.exists() { dlc_src = Some(p2); }
+            }
+        }
+    }
+    
+    if dlc_src.is_none() {
+        let current = std::env::current_dir().unwrap_or_default();
+        let p3 = current.join("src-tauri").join("resources").join("DLC");
+        let p4 = current.join("resources").join("DLC");
+        if p3.exists() { dlc_src = Some(p3); }
+        else if p4.exists() { dlc_src = Some(p4); }
+    }
+
+    if dlc_src.is_none() {
+        let p5 = root.join("DLC");
+        if p5.exists() { dlc_src = Some(p5); }
+    }
+    
+    match dlc_src {
+        Some(src) => {
+            let dlc_dest = instance_dir.join("Windows64Media").join("DLC");
+            let _ = fs::create_dir_all(&dlc_dest);
+            
+            if let Ok(entries) = fs::read_dir(&src) {
+                for entry in entries.flatten() {
+                    let name = entry.file_name();
+                    let dest_path = dlc_dest.join(&name);
+                    
+                    if !dest_path.exists() {
+                        if let Err(e) = if entry.path().is_dir() {
+                            copy_dir_all(entry.path(), &dest_path)
+                        } else {
+                            fs::copy(entry.path(), &dest_path).map(|_| ())
+                        } {
+                            eprintln!("[DLC Sync] Failed to copy {:?} to {:?}: {}", entry.path(), dest_path, e);
+                        } else {
+                            println!("[DLC Sync] Copied to {:?}", dest_path);
+                        }
+                    } else {
+                        println!("[DLC Sync] Skipping {:?}: Already exists in instance", name);
+                    }
+                }
+            }
+            Ok(())
+        },
+        None => {
+            println!("[DLC Sync] Skipping sync: No DLC source found.");
+            Ok(())
+        }
+    }
+}
+
+#[tauri::command]
+async fn sync_dlc(app: AppHandle, instanceId: String) -> Result<(), String> {
+    let root = get_app_dir(&app);
+    let instance_dir = root.join("instances").join(&instanceId);
+    perform_dlc_sync(&app, &instance_dir)
+}
+
 #[tauri::command]
 #[allow(non_snake_case)]
 async fn launch_game(app: AppHandle, state: State<'_, GameState>, instanceId: String, servers: Vec<McServer>) -> Result<(), String> {
@@ -814,6 +885,8 @@ async fn launch_game(app: AppHandle, state: State<'_, GameState>, instanceId: St
             let _ = fs::write(skin_dir.join("char.png"), bytes);
         }
     }
+
+    let _ = perform_dlc_sync(&app, &instance_dir)?;
 
     let game_exe = instance_dir.join("Minecraft.Client.exe");
     if !game_exe.exists() {
@@ -1049,7 +1122,7 @@ pub fn run() {
         .plugin(tauri_plugin_gamepad::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_drpc::init())
-        .invoke_handler(tauri::generate_handler![setup_macos_runtime, launch_game, stop_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme, download_runner, delete_instance, update_tray_icon])
+        .invoke_handler(tauri::generate_handler![setup_macos_runtime, launch_game, stop_game, check_game_installed, save_config, load_config, download_and_install, open_instance_folder, cancel_download, get_available_runners, get_external_palettes, import_theme, download_runner, delete_instance, update_tray_icon, sync_dlc])
         .setup(|app| {
             let config = load_config(app.handle().clone());
             let visible = config.enable_tray_icon.unwrap_or(true);

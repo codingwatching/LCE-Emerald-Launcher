@@ -89,6 +89,7 @@ export function useGameManager({ profile, setProfile, customEditions, setCustomE
       setDownloadingId(id);
       setDownloadProgress(0);
       await TauriService.downloadAndInstall(edition.url, id);
+      await TauriService.syncDlc(id);
       await checkInstalls();
       setProfile(id);
       setDownloadProgress(null);
