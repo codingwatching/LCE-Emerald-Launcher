@@ -388,14 +388,14 @@ async fn download_runner(app: AppHandle, state: State<'_, DownloadState>, name: 
 
 #[tauri::command]
 #[allow(non_snake_case)]
-fn check_game_installed(app: AppHandle, instanceId: String) -> bool {
-    get_app_dir(&app).join("instances").join(&instanceId).join("Minecraft.Client.exe").exists()
+fn check_game_installed(app: AppHandle, instance_id: String) -> bool {
+    get_app_dir(&app).join("instances").join(&instance_id).join("Minecraft.Client.exe").exists()
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-fn open_instance_folder(app: AppHandle, instanceId: String) {
-    let dir = get_app_dir(&app).join("instances").join(&instanceId);
+fn open_instance_folder(app: AppHandle, instance_id: String) {
+    let dir = get_app_dir(&app).join("instances").join(&instance_id);
     if dir.exists() {
         let _ = app.opener().open_path(dir.to_str().unwrap(), None::<&str>);
     }
@@ -403,8 +403,8 @@ fn open_instance_folder(app: AppHandle, instanceId: String) {
 
 #[tauri::command]
 #[allow(non_snake_case)]
-fn delete_instance(app: AppHandle, instanceId: String) -> Result<(), String> {
-    let dir = get_app_dir(&app).join("instances").join(&instanceId);
+fn delete_instance(app: AppHandle, instance_id: String) -> Result<(), String> {
+    let dir = get_app_dir(&app).join("instances").join(&instance_id);
     if dir.exists() {
         let _ = fs::remove_dir_all(dir);
     }
@@ -594,9 +594,9 @@ fn copy_dir_all(src: impl AsRef<std::path::Path>, dst: impl AsRef<std::path::Pat
 
 #[tauri::command]
 #[allow(non_snake_case)]
-async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, url: String, instanceId: String) -> Result<String, String> {
+async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, url: String, instance_id: String) -> Result<String, String> {
     let root = get_app_dir(&app);
-    let instance_dir = root.join("instances").join(&instanceId);
+    let instance_dir = root.join("instances").join(&instance_id);
     let token = CancellationToken::new();
     let child_token = token.clone();
     {
@@ -661,7 +661,7 @@ async fn download_and_install(app: AppHandle, state: State<'_, DownloadState>, u
         }
     }
 
-    let zip_path = root.join(format!("temp_{}.zip", instanceId));
+    let zip_path = root.join(format!("temp_{}.zip", instance_id));
     let response = reqwest::get(&url).await.map_err(|e| e.to_string())?;
 
     if !response.status().is_success() {
@@ -861,17 +861,17 @@ fn perform_dlc_sync(app: &AppHandle, instance_dir: &PathBuf) -> Result<(), Strin
 }
 
 #[tauri::command]
-async fn sync_dlc(app: AppHandle, instanceId: String) -> Result<(), String> {
+async fn sync_dlc(app: AppHandle, instance_id: String) -> Result<(), String> {
     let root = get_app_dir(&app);
-    let instance_dir = root.join("instances").join(&instanceId);
+    let instance_dir = root.join("instances").join(&instance_id);
     perform_dlc_sync(&app, &instance_dir)
 }
 
 #[tauri::command]
 #[allow(non_snake_case)]
-async fn launch_game(app: AppHandle, state: State<'_, GameState>, instanceId: String, servers: Vec<McServer>) -> Result<(), String> {
+async fn launch_game(app: AppHandle, state: State<'_, GameState>, instance_id: String, servers: Vec<McServer>) -> Result<(), String> {
     let root = get_app_dir(&app);
-    let instance_dir = root.join("instances").join(&instanceId);
+    let instance_dir = root.join("instances").join(&instance_id);
     let config = load_config(app.clone());
     let username = config.username;
     let _ = fs::write(instance_dir.join("username.txt"), &username);
