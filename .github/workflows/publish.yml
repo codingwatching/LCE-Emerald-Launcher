@@ -28,7 +28,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libudev-dev
 
       - name: setup pnpm
         uses: pnpm/action-setup@v4
@@ -85,8 +85,26 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Emerald v__VERSION__'
-          releaseBody: '*pls edit me*'
-          releaseDraft: true
+          releaseBody: |
+            # What to download?
+            - `Emerald.Legacy.Launcher-*.rpm` for GNU/Linux (RHEL)
+            - `Emerald.Legacy.Launcher-*.deb` for GNU/Linux (Debian+Ubuntu)
+            - `Emerald.Legacy.Launcher-*.AppImage` for GNU/Linux (Universal)
+            - `Emerald.Legacy.Launcher-*_x64.dmg` for macOS (Intel)
+            - `Emerald.Legacy.Launcher-*_aarch64.dmg` for macOS (M-series)
+            - `Emerald.Legacy.Launcher-*.exe` for Windows (Setup)
+            - `Emerald.Legacy.Launcher-*.msi` for Windows (Setup)
+            ---
+            # Windows SmartScreen
+            This software is completely safe. Because the launcher is unsigned, you will see a "Windows protected your PC" window. To proceed:
+            
+            1. Click the **"More info"** link under the main text.
+            2. Click the **"Run anyway"** button that appears.
+            ---
+            # macOS "Damaged" Error Fix
+            The macOS builds now include automatic fixes for Gatekeeper quarantine issues. The app should launch without "application is damaged" errors.
+
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }}
 
@@ -94,7 +112,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    needs: publish-tauri  # Wait for Tauri release to be created
     container:
       image: bilelmoussaoui/flatpak-github-actions:freedesktop-23.08
       options: --privileged
@@ -102,6 +119,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: sleep for 10 seconds
+      - run: sleep 10
       - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: io.github.Emerald_Legacy_Launcher.Emerald_Legacy_Launcher.flatpak
