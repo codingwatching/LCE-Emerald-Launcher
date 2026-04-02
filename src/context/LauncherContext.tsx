@@ -20,8 +20,6 @@ interface UIContextType {
   isWindowVisible: boolean;
   showCredits: boolean;
   setShowCredits: (show: boolean) => void;
-  showSpecialThanks: boolean;
-  setShowSpecialThanks: (show: boolean) => void;
   focusSection: "menu" | "skin";
   setFocusSection: (section: "menu" | "skin") => void;
   onNavigateToSkin: () => void;
@@ -44,7 +42,6 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
   const [isUiHidden, setIsUiHidden] = useState(false);
   const [isWindowVisible, setIsWindowVisible] = useState(true);
   const [showCredits, setShowCredits] = useState(false);
-  const [showSpecialThanks, setShowSpecialThanks] = useState(false);
   const [focusSection, setFocusSection] = useState<"menu" | "skin">("menu");
 
   const { updateMessage, clearUpdateMessage } = useUpdateCheck();
@@ -71,19 +68,13 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
     configRaw.rpcEnabled, configRaw.musicVol, configRaw.sfxVol, configRaw.isDayTime,
     configRaw.profile, configRaw.linuxRunner, configRaw.perfBoost, configRaw.customEditions,
     configRaw.legacyMode, configRaw.keepLauncherOpen, configRaw.enableTrayIcon,
-    configRaw.animationsEnabled, configRaw.saveConfig, configRaw.setUsername, configRaw.setTheme,
-    configRaw.setLayout, configRaw.setVfxEnabled, configRaw.setAnimationsEnabled,
-    configRaw.setRpcEnabled, configRaw.setMusicVol, configRaw.setSfxVol, configRaw.setIsDayTime,
-    configRaw.setProfile, configRaw.setLinuxRunner, configRaw.setPerfBoost, configRaw.setCustomEditions,
-    configRaw.isLoaded, configRaw.hasCompletedSetup, configRaw.setHasCompletedSetup
+    configRaw.animationsEnabled
   ]);
 
   const game = useMemo(() => gameRaw, [
     gameRaw.installs, gameRaw.isGameRunning, gameRaw.downloadProgress,
     gameRaw.downloadingId, gameRaw.editions, gameRaw.isRunnerDownloading,
-    gameRaw.runnerDownloadProgress, gameRaw.error, gameRaw.updateCustomEdition, configRaw.profile,
-    gameRaw.handleLaunch, gameRaw.stopGame, gameRaw.toggleInstall, gameRaw.handleUninstall,
-    gameRaw.addCustomEdition, gameRaw.deleteCustomEdition, gameRaw.downloadRunner, gameRaw.checkInstalls
+    gameRaw.runnerDownloadProgress, gameRaw.error, gameRaw.updateCustomEdition, configRaw.profile
   ]);
 
   const audio = useMemo(() => audioRaw, [
@@ -174,10 +165,10 @@ export function LauncherProvider({ children }: { children: React.ReactNode }) {
     activeView, setActiveView, showIntro, setShowIntro,
     logoAnimDone, setLogoAnimDone, isUiHidden, setIsUiHidden,
     isWindowVisible,
-    showCredits, setShowCredits, showSpecialThanks, setShowSpecialThanks, focusSection, setFocusSection,
+    showCredits, setShowCredits, focusSection, setFocusSection,
     onNavigateToSkin, onNavigateToMenu, connected,
     updateMessage, clearUpdateMessage
-  }), [activeView, showIntro, logoAnimDone, isUiHidden, isWindowVisible, showCredits, showSpecialThanks, focusSection, onNavigateToSkin, onNavigateToMenu, connected, updateMessage, clearUpdateMessage]);
+  }), [activeView, showIntro, logoAnimDone, isUiHidden, isWindowVisible, showCredits, focusSection, onNavigateToSkin, onNavigateToMenu, connected, updateMessage, clearUpdateMessage]);
 
   return (
     <UIContext.Provider value={uiValue}>
