@@ -4,6 +4,15 @@ on:
   workflow_dispatch:
 
 jobs:
+  get-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: version
+        run: echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
   publish-tauri:
     permissions:
       contents: write
@@ -110,6 +119,7 @@ jobs:
           args: ${{ matrix.args }}
 
   publish-flatpak:
+    needs: get-version
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -129,7 +139,7 @@ jobs:
           cache-key: flatpak-builder-${{ github.sha }}
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest # please work i beg you
+          tag_name: v${{ needs.get-version.outputs.version }}
           files: Emerald.Legacy.Launcher.flatpak
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
