@@ -130,7 +130,7 @@ export default function App() {
             <TeamModal
               isOpen={showCredits}
               onClose={() => setShowCredits(false)}
-              playClickSound={audio.playClickSound}
+              playPressSound={audio.playPressSound}
               playSfx={audio.playSfx}
             />
           )}
@@ -202,7 +202,7 @@ export default function App() {
                       >
                         <button
                           onClick={() => {
-                            audio.playClickSound();
+                            audio.playPressSound();
                             setIsUiHidden(!isUiHidden);
                           }}
                           className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
@@ -231,7 +231,7 @@ export default function App() {
                         </span>
                         <button
                           onClick={() => {
-                            audio.playClickSound();
+                            audio.playPressSound();
                             config.setIsDayTime(!config.isDayTime);
                           }}
                           className="hover:scale-110 active:scale-95 transition-transform outline-none bg-transparent border-none"
@@ -310,7 +310,7 @@ export default function App() {
                         key="skin-viewer"
                         username={config.username}
                         setUsername={config.setUsername}
-                        playClickSound={audio.playClickSound}
+                        playPressSound={audio.playPressSound}
                         skinUrl={skinUrl}
                         setSkinUrl={setSkinUrl}
                         setActiveView={setActiveView}

@@ -23,7 +23,7 @@ const DEFAULT_SKINS: SavedSkin[] = [
 
 const SkinsView = memo(function SkinsView() {
   const { setActiveView } = useUI();
-  const { playClickSound, playBackSound } = useAudio();
+  const { playPressSound, playBackSound } = useAudio();
   const { skinUrl, setSkinUrl } = useSkin();
 
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
@@ -76,7 +76,7 @@ const SkinsView = memo(function SkinsView() {
 
   const handleFetchUsername = async () => {
     if (!importUsername.trim()) return;
-    playClickSound();
+    playPressSound();
     setIsImporting(true);
     setImportError('');
     try {
@@ -123,8 +123,8 @@ const SkinsView = memo(function SkinsView() {
           setModalFocusIndex(prev => (prev - 1 + 3) % 3);
         } else if (e.key === 'Enter') {
           if (!importMode) {
-            if (modalFocusIndex === 0) { playClickSound(); fileInputRef.current?.click(); }
-            else if (modalFocusIndex === 1) { playClickSound(); setImportMode('username'); setModalFocusIndex(0); }
+            if (modalFocusIndex === 0) { playPressSound(); fileInputRef.current?.click(); }
+            else if (modalFocusIndex === 1) { playPressSound(); setImportMode('username'); setModalFocusIndex(0); }
             else if (modalFocusIndex === 2) {
               playBackSound();
               setShowImportModal(false);
@@ -173,7 +173,7 @@ const SkinsView = memo(function SkinsView() {
       } else if (e.key === 'Enter' && focusIndex !== null) {
         if (focusIndex === 0) handleImportClick();
         else if (focusIndex === 1) handleDeleteActive();
-        else if (focusIndex === 2) { playClickSound(); TauriService.openInstanceFolder('Skins').catch(() => { }); }
+        else if (focusIndex === 2) { playPressSound(); TauriService.openInstanceFolder('Skins').catch(() => { }); }
         else if (focusIndex < BACK_BUTTON_INDEX) {
           handleSkinSelect(savedSkins[focusIndex - SKINS_START_INDEX]);
         } else {
@@ -184,7 +184,7 @@ const SkinsView = memo(function SkinsView() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [focusIndex, savedSkins.length, playBackSound, setActiveView, playClickSound, showImportModal, importMode, modalFocusIndex, importUsername]);
+  }, [focusIndex, savedSkins.length, playBackSound, setActiveView, playPressSound, showImportModal, importMode, modalFocusIndex, importUsername]);
 
   useEffect(() => {
     if (focusIndex !== null) {
@@ -194,7 +194,7 @@ const SkinsView = memo(function SkinsView() {
   }, [focusIndex]);
 
   const handleImportClick = () => {
-    playClickSound();
+    playPressSound();
     setShowImportModal(true);
     setModalFocusIndex(0);
   };
@@ -217,7 +217,7 @@ const SkinsView = memo(function SkinsView() {
   };
 
   const handleSkinSelect = (skin: SavedSkin) => {
-    playClickSound();
+    playPressSound();
     setActiveSkinId(skin.id);
     setSkinUrl(skin.url);
   };
@@ -226,7 +226,7 @@ const SkinsView = memo(function SkinsView() {
 
   const handleDeleteActive = () => {
     if (!activeSkinId || isDefaultSkin(activeSkinId)) return;
-    playClickSound();
+    playPressSound();
     const updatedSkins = savedSkins.filter(s => s.id !== activeSkinId);
     setSavedSkins(updatedSkins);
     setSkinUrl('/images/Default.png');
@@ -278,7 +278,7 @@ const SkinsView = memo(function SkinsView() {
             <button
               data-index="2"
               onMouseEnter={() => setFocusIndex(2)}
-              onClick={() => { playClickSound(); TauriService.openInstanceFolder('Skins').catch(() => { }); }}
+              onClick={() => { playPressSound(); TauriService.openInstanceFolder('Skins').catch(() => { }); }}
               className={`mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all`}
               style={{ backgroundImage: focusIndex === 2 ? "url('/images/Button_Square_Highlighted.png')" : "url('/images/Button_Square.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
             >
@@ -337,7 +337,7 @@ const SkinsView = memo(function SkinsView() {
               <div className="flex flex-col gap-4 w-full px-4 mb-2">
                 <button
                   onMouseEnter={() => setModalFocusIndex(0)}
-                  onClick={() => { playClickSound(); fileInputRef.current?.click(); }}
+                  onClick={() => { playPressSound(); fileInputRef.current?.click(); }}
                   className={`w-full h-12 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none ${modalFocusIndex === 0 ? 'text-[#FFFF55]' : 'text-white'}`}
                   style={{ backgroundImage: modalFocusIndex === 0 ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                 >
@@ -345,7 +345,7 @@ const SkinsView = memo(function SkinsView() {
                 </button>
                 <button
                   onMouseEnter={() => setModalFocusIndex(1)}
-                  onClick={() => { playClickSound(); setImportMode('username'); setModalFocusIndex(0); }}
+                  onClick={() => { playPressSound(); setImportMode('username'); setModalFocusIndex(0); }}
                   className={`w-full h-12 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none ${modalFocusIndex === 1 ? 'text-[#FFFF55]' : 'text-white'}`}
                   style={{ backgroundImage: modalFocusIndex === 1 ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", backgroundSize: '100% 100%', imageRendering: 'pixelated' }}
                 >

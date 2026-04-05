@@ -7,7 +7,7 @@ import { useUI, useConfig, useAudio, useGame } from "../../context/LauncherConte
 const VersionsView = memo(function VersionsView() {
   const { setActiveView } = useUI();
   const { profile: selectedProfile, setProfile: setSelectedProfile } = useConfig();
-  const { playClickSound, playBackSound, playSfx } = useAudio();
+  const { playPressSound, playBackSound, playSfx } = useAudio();
   const { editions, installs: installedVersions, toggleInstall, handleUninstall: onUninstall, deleteCustomEdition: onDeleteEdition, addCustomEdition: onAddEdition, updateCustomEdition: onUpdateEdition, downloadingId, downloadProgress } = useGame();
 
   const [focusRow, setFocusRow] = useState<number>(0);
@@ -54,21 +54,21 @@ const VersionsView = memo(function VersionsView() {
 
           if (focusCol === 0) {
             if (isInstalled) {
-              playClickSound();
+              playPressSound();
               setSelectedProfile(edition.id);
             } else if (!downloadingId) {
-              playClickSound();
+              playPressSound();
               toggleInstall(edition.id);
             }
           } else if (focusCol === 1 && !downloadingId) {
-            playClickSound();
+            playPressSound();
             toggleInstall(edition.id);
           } else if (focusCol === 2) {
             if (isInstalled) {
-              playClickSound();
+              playPressSound();
               TauriService.openInstanceFolder(edition.id);
             } else if (isCustom) {
-              playClickSound();
+              playPressSound();
               setEditingEdition(edition);
               setIsImportModalOpen(true);
             }
@@ -82,7 +82,7 @@ const VersionsView = memo(function VersionsView() {
             }
           } else if (focusCol === 4) {
             if (isCustom) {
-              playClickSound();
+              playPressSound();
               setEditingEdition(edition);
               setIsImportModalOpen(true);
             }
@@ -93,7 +93,7 @@ const VersionsView = memo(function VersionsView() {
             }
           }
         } else if (focusRow === editions.length) {
-          playClickSound();
+          playPressSound();
           setIsImportModalOpen(true);
         } else {
           playBackSound();
@@ -108,7 +108,7 @@ const VersionsView = memo(function VersionsView() {
     focusCol,
     editions,
     installedVersions,
-    playClickSound,
+    playPressSound,
     playBackSound,
     setSelectedProfile,
     setActiveView,
@@ -169,7 +169,7 @@ const VersionsView = memo(function VersionsView() {
                   }}
                   onClick={() => {
                     if (isInstalled) {
-                      playClickSound();
+                      playPressSound();
                       setSelectedProfile(edition.id);
                     } else {
                       toggleInstall(edition.id);
@@ -208,7 +208,7 @@ const VersionsView = memo(function VersionsView() {
                       onClick={(e) => {
                         e.stopPropagation();
                         if (!downloadingId) {
-                          playClickSound();
+                          playPressSound();
                           toggleInstall(edition.id);
                         }
                       }}
@@ -251,7 +251,7 @@ const VersionsView = memo(function VersionsView() {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (!downloadingId) {
-                            playClickSound();
+                            playPressSound();
                             toggleInstall(edition.id);
                           }
                         }}
@@ -291,7 +291,7 @@ const VersionsView = memo(function VersionsView() {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          playClickSound();
+                          playPressSound();
                           TauriService.openInstanceFolder(edition.id);
                         }}
                         className="mc-sq-btn w-10 h-10 flex items-center justify-center outline-none border-none transition-all"
@@ -365,7 +365,7 @@ const VersionsView = memo(function VersionsView() {
                         }}
                         onClick={(e) => {
                           e.stopPropagation();
-                          playClickSound();
+                          playPressSound();
                           setEditingEdition(edition);
                           setIsImportModalOpen(true);
                         }}
@@ -449,7 +449,7 @@ const VersionsView = memo(function VersionsView() {
             setFocusCol(0);
           }}
           onClick={() => {
-            playClickSound();
+            playPressSound();
             setIsImportModalOpen(true);
           }}
           className={`w-72 h-14 flex items-center justify-center transition-colors text-2xl mc-text-shadow outline-none border-none ${focusRow === editions.length ? "text-[#FFFF55]" : "text-white"}`}

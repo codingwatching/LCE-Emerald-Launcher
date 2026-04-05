@@ -7,7 +7,7 @@ import { useUI, useConfig, useAudio, useGame } from "../../context/LauncherConte
 const SettingsView = memo(function SettingsView() {
   const { setActiveView } = useUI();
   const { vfxEnabled, setVfxEnabled, animationsEnabled, setAnimationsEnabled, musicVol: musicVolume, setMusicVol: setMusicVolume, sfxVol: sfxVolume, setSfxVol: setSfxVolume, layout, setLayout, linuxRunner, setLinuxRunner, perfBoost, setPerfBoost, rpcEnabled, setRpcEnabled, legacyMode, setLegacyMode, keepLauncherOpen, setKeepLauncherOpen, enableTrayIcon, setEnableTrayIcon } = useConfig();
-  const { currentTrack, setCurrentTrack, tracks, playClickSound, playBackSound } = useAudio();
+  const { currentTrack, setCurrentTrack, tracks, playPressSound, playBackSound } = useAudio();
   const { isGameRunning, stopGame, isRunnerDownloading, runnerDownloadProgress, downloadRunner } = useGame();
   const { isLinux, isMac } = usePlatform();
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
@@ -22,49 +22,49 @@ const SettingsView = memo(function SettingsView() {
   }, [isRunnerDownloading]);
 
   const handleLayoutToggle = () => {
-    playClickSound();
+    playPressSound();
     const currentIndex = layouts.indexOf(layout);
     const nextIndex = (currentIndex + 1) % layouts.length;
     setLayout(layouts[nextIndex]);
   };
 
   const handleVfxToggle = () => {
-    playClickSound();
+    playPressSound();
     setVfxEnabled(!vfxEnabled);
   };
 
   const handleAnimationsToggle = () => {
-    playClickSound();
+    playPressSound();
     setAnimationsEnabled(!animationsEnabled);
   };
 
   const handlePerfToggle = () => {
-    playClickSound();
+    playPressSound();
     setPerfBoost(!perfBoost);
   };
 
   const handleRpcToggle = () => {
-    playClickSound();
+    playPressSound();
     setRpcEnabled(!rpcEnabled);
   };
 
   const handleLegacyToggle = () => {
-    playClickSound();
+    playPressSound();
     setLegacyMode(!legacyMode);
   };
 
   const handleKeepOpenToggle = () => {
-    playClickSound();
+    playPressSound();
     setKeepLauncherOpen(!keepLauncherOpen);
   };
 
   const handleTrayToggle = () => {
-    playClickSound();
+    playPressSound();
     setEnableTrayIcon(!enableTrayIcon);
   };
 
   const handleRunnerToggle = () => {
-    playClickSound();
+    playPressSound();
     if (runners.length === 0) return;
     const currentIndex = runners.findIndex((r) => r.id === linuxRunner);
     const nextIndex = (currentIndex + 1) % runners.length;
@@ -72,12 +72,12 @@ const SettingsView = memo(function SettingsView() {
   };
 
   const handleTrackToggle = () => {
-    playClickSound();
+    playPressSound();
     setCurrentTrack((currentTrack + 1) % tracks.length);
   };
 
   const handleResetSetup = () => {
-    playClickSound();
+    playPressSound();
 
     // Create styled confirmation dialog
     const dialog = document.createElement('div');
@@ -207,27 +207,27 @@ const SettingsView = memo(function SettingsView() {
     if (currentSubMenu === "main") {
       items.push({
         id: "audio_menu",
-        label: "Audio Settings",
+        label: "Audio",
         type: "button",
-        onClick: () => { playClickSound(); setCurrentSubMenu("audio"); setFocusIndex(0); },
+        onClick: () => { playPressSound(); setCurrentSubMenu("audio"); setFocusIndex(0); },
       });
       items.push({
         id: "video_menu",
-        label: "Video Settings",
+        label: "Video",
         type: "button",
-        onClick: () => { playClickSound(); setCurrentSubMenu("video"); setFocusIndex(0); },
+        onClick: () => { playPressSound(); setCurrentSubMenu("video"); setFocusIndex(0); },
       });
       items.push({
         id: "controls_menu",
         label: "Controls",
         type: "button",
-        onClick: () => { playClickSound(); setCurrentSubMenu("controls"); setFocusIndex(0); },
+        onClick: () => { playPressSound(); setCurrentSubMenu("controls"); setFocusIndex(0); },
       });
       items.push({
         id: "launcher_menu",
-        label: "Launcher Settings",
+        label: "Launcher",
         type: "button",
-        onClick: () => { playClickSound(); setCurrentSubMenu("launcher"); setFocusIndex(0); },
+        onClick: () => { playPressSound(); setCurrentSubMenu("launcher"); setFocusIndex(0); },
       });
     } else if (currentSubMenu === "audio") {
       items.push({
@@ -239,7 +239,7 @@ const SettingsView = memo(function SettingsView() {
       });
       items.push({
         id: "sfx",
-        label: `SFX: ${sfxVolume ?? 100}%`,
+        label: `Sound: ${sfxVolume ?? 100}%`,
         type: "slider",
         value: sfxVolume ?? 100,
         onChange: setSfxVolume,
@@ -397,7 +397,7 @@ const SettingsView = memo(function SettingsView() {
     handleResetSetup,
     stopGame,
     downloadRunner,
-    playClickSound,
+    playPressSound,
     playBackSound,
     setActiveView,
     runners,
@@ -469,6 +469,14 @@ const SettingsView = memo(function SettingsView() {
     color: focusIndex === index ? "#FFFF55" : "white",
   });
 
+  const isToggleOption = (label: string): boolean => {
+    return label.includes("ON") || label.includes("OFF") || label.includes("Enabled") || label.includes("Disabled");
+  };
+
+  const getToggleState = (label: string): boolean => {
+    return label.includes("ON") || label.includes("Enabled");
+  };
+
   return (
     <motion.div
       ref={containerRef}
@@ -480,72 +488,152 @@ const SettingsView = memo(function SettingsView() {
       className="flex flex-col items-center w-full max-w-2xl outline-none"
     >
       <h2 className="text-2xl text-white mc-text-shadow mt-2 mb-4 border-b-2 border-[#373737] pb-2 w-[40%] max-w-[200px] text-center tracking-widest uppercase opacity-80 font-bold whitespace-nowrap px-4">
-        {currentSubMenu === "main" ? "Settings" : currentSubMenu === "audio" ? "Audio Settings" : currentSubMenu === "video" ? "Video Settings" : currentSubMenu === "controls" ? "Controls" : "Launcher"}
+        {currentSubMenu === "main" ? "Settings" : currentSubMenu === "audio" ? "Audio" : currentSubMenu === "video" ? "Video" : currentSubMenu === "controls" ? "Controls" : "Launcher"}
       </h2>
 
-      <div className="w-full max-w-[540px] space-y-2 mb-4 p-6 flex flex-col items-center overflow-y-auto max-h-[55vh]">
-        {settingsItems.map((item, index) => {
-          if (item.id === "back") return null;
+      {currentSubMenu === "main" ? (
+        // Main settings menu - original style with button textures
+        <div className="w-full max-w-[540px] space-y-2 mb-4 p-6 flex flex-col items-center overflow-y-auto max-h-[55vh]">
+          {settingsItems.map((item, index) => {
+            if (item.id === "back") return null;
 
-          if (item.type === "slider") {
+            if (item.type === "slider") {
+              return (
+                <div
+                  key={item.id}
+                  data-index={index}
+                  tabIndex={0}
+                  onMouseEnter={() => setFocusIndex(index)}
+                  className="relative w-[360px] h-10 flex items-center justify-center cursor-pointer transition-all outline-none border-none hover:text-[#FFFF55] shrink-0"
+                  style={getSliderStyle(index)}
+                >
+                  <span
+                    className={`absolute z-10 text-xl mc-text-shadow pointer-events-none transition-colors tracking-widest ${focusIndex === index ? "text-[#FFFF55]" : "text-white"}`}
+                  >
+                    {item.label}
+                  </span>
+                  <div className="absolute w-full h-full flex items-center justify-center">
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={item.value}
+                      onChange={(e) => item.onChange(parseInt(e.target.value))}
+                      onMouseUp={playPressSound}
+                      className="mc-slider-custom w-[calc(100%+16px)] h-full opacity-100 cursor-pointer z-20 outline-none m-0"
+                    />
+                  </div>
+                </div>
+              );
+            }
+
+            const isRed = (item as any).color === "red";
+            const isSmall = (item as any).small;
+
             return (
-              <div
+              <button
                 key={item.id}
                 data-index={index}
-                tabIndex={0}
                 onMouseEnter={() => setFocusIndex(index)}
-                className="relative w-[360px] h-10 flex items-center justify-center cursor-pointer transition-all outline-none border-none hover:text-[#FFFF55] shrink-0"
-                style={getSliderStyle(index)}
+                onClick={item.onClick}
+                className={`w-[360px] h-10 flex items-center justify-center px-4 relative z-30 transition-colors outline-none border-none shrink-0 ${isRed
+                  ? focusIndex === index
+                    ? "text-red-400"
+                    : "text-red-200"
+                  : focusIndex === index
+                    ? "text-[#FFFF55]"
+                    : "text-white"
+                  } ${isRed ? "hover:text-red-500" : "hover:text-[#FFFF55]"}`}
+                style={getItemStyle(index)}
               >
                 <span
-                  className={`absolute z-10 text-xl mc-text-shadow pointer-events-none transition-colors tracking-widest ${focusIndex === index ? "text-[#FFFF55]" : "text-white"}`}
+                  className={`mc-text-shadow tracking-widest uppercase ${isSmall ? "text-xs" : item.label.length > 20 ? "text-lg" : "text-xl"} truncate w-full text-center`}
                 >
                   {item.label}
                 </span>
-                <div className="absolute w-full h-full flex items-center justify-center">
-                  <input
-                    type="range"
-                    min="0"
-                    max="100"
-                    step="1"
-                    value={item.value}
-                    onChange={(e) => item.onChange(parseInt(e.target.value))}
-                    onMouseUp={playClickSound}
-                    className="mc-slider-custom w-[calc(100%+16px)] h-full opacity-100 cursor-pointer z-20 outline-none m-0"
-                  />
-                </div>
-              </div>
+              </button>
             );
-          }
+          })}
+        </div>
+      ) : (
+        // Sub-menus - new style with background.png and toggle switches
+        <div 
+          className="min-w-[420px] w-fit p-6 flex flex-col items-center"
+          style={{
+            backgroundImage: "url('/images/background.png')",
+            backgroundSize: "100% 100%",
+            backgroundRepeat: "no-repeat",
+            imageRendering: "pixelated",
+          }}
+        >
+          <div className="w-full space-y-3 flex flex-col items-center overflow-y-auto max-h-[50vh] py-2">
+            {settingsItems.map((item, index) => {
+              if (item.id === "back") return null;
 
-          const isRed = (item as any).color === "red";
-          const isSmall = (item as any).small;
+              if (item.type === "slider") {
+                return (
+                  <div
+                    key={item.id}
+                    data-index={index}
+                    tabIndex={0}
+                    onMouseEnter={() => setFocusIndex(index)}
+                    className="relative w-[360px] h-10 flex items-center justify-center cursor-pointer transition-all outline-none border-none hover:text-[#FFFF55] shrink-0"
+                    style={getSliderStyle(index)}
+                  >
+                    <span
+                      className={`absolute z-10 text-xl pointer-events-none transition-colors tracking-widest ${focusIndex === index ? "text-[#FFFF55]" : item.id === "music" || item.id === "sfx" ? "text-white" : "text-[#2a2a2a]"}`}
+                    >
+                      {item.label}
+                    </span>
+                    <div className="absolute w-full h-full flex items-center justify-center">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        step="1"
+                        value={item.value}
+                        onChange={(e) => item.onChange(parseInt(e.target.value))}
+                        onMouseUp={playPressSound}
+                        className="mc-slider-custom w-[calc(100%+16px)] h-full opacity-100 cursor-pointer z-20 outline-none m-0"
+                      />
+                    </div>
+                  </div>
+                );
+              }
 
-          return (
-            <button
-              key={item.id}
-              data-index={index}
-              onMouseEnter={() => setFocusIndex(index)}
-              onClick={item.onClick}
-              className={`w-[360px] h-10 flex items-center justify-center px-4 relative z-30 transition-colors outline-none border-none shrink-0 ${isRed
-                ? focusIndex === index
-                  ? "text-red-400"
-                  : "text-red-200"
-                : focusIndex === index
-                  ? "text-[#FFFF55]"
-                  : "text-white"
-                } ${isRed ? "hover:text-red-500" : "hover:text-[#FFFF55]"}`}
-              style={getItemStyle(index)}
-            >
-              <span
-                className={`mc-text-shadow tracking-widest uppercase ${isSmall ? "text-xs" : item.label.length > 20 ? "text-lg" : "text-xl"} truncate w-full text-center`}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              const isRed = (item as any).color === "red";
+              const isSmall = (item as any).small;
+              const isToggle = isToggleOption(item.label);
+              const toggleState = isToggle ? getToggleState(item.label) : false;
+
+              return (
+                <button
+                  key={item.id}
+                  data-index={index}
+                  onMouseEnter={() => setFocusIndex(index)}
+                  onClick={item.onClick}
+                  className={`w-[360px] h-10 flex items-center justify-between px-4 relative z-30 transition-all outline-none border-none shrink-0 rounded ${focusIndex === index ? "bg-black/10" : "bg-transparent"} ${isRed ? "text-red-600" : "text-[#2a2a2a]"} hover:bg-black/15`}
+                >
+                  <span
+                    className={`tracking-widest uppercase ${isSmall ? "text-xs" : item.label.length > 25 ? "text-base" : "text-lg"} truncate text-left flex-1`}
+                  >
+                    {isToggle ? item.label.split(":")[0] : item.label}
+                  </span>
+                  {isToggle && (
+                    <img
+                      src={toggleState ? "/images/Toggle_Switch_On.png" : "/images/Toggle_Switch_Off.png"}
+                      alt={toggleState ? "ON" : "OFF"}
+                      className="w-12 h-6 object-contain shrink-0 ml-2"
+                      style={{ imageRendering: "pixelated" }}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {(() => {
         const backIndex = settingsItems.findIndex((i) => i.id === "back");
@@ -557,9 +645,14 @@ const SettingsView = memo(function SettingsView() {
             data-index={backIndex}
             onMouseEnter={() => setFocusIndex(backIndex)}
             onClick={backItem.onClick}
-            className={`w-72 h-10 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${focusIndex === backIndex ? "text-[#FFFF55]" : "text-white"
-              }`}
-            style={getItemStyle(backIndex)}
+            className={`w-72 h-10 flex items-center justify-center transition-colors text-xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] mt-4 ${focusIndex === backIndex ? "text-[#FFFF55]" : "text-white"}`}
+            style={{
+              backgroundImage: focusIndex === backIndex
+                ? "url('/images/button_highlighted.png')"
+                : "url('/images/Button_Background.png')",
+              backgroundSize: "100% 100%",
+              imageRendering: "pixelated",
+            }}
           >
             Back
           </button>

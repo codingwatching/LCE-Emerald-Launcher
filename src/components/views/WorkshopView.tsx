@@ -4,19 +4,19 @@ import { useUI, useAudio, useConfig } from '../../context/LauncherContext';
 
 const WorkshopView = memo(function WorkshopView() {
   const { setActiveView } = useUI();
-  const { playBackSound } = useAudio();
+  const { playPressSound } = useAudio();
   const [backHover, setBackHover] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === 'Backspace') {
-        playBackSound();
+        playPressSound();
         setActiveView('main');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [playBackSound, setActiveView]);
+  }, [playPressSound, setActiveView]);
 
   return (
     <motion.div tabIndex={0} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: useConfig().animationsEnabled ? 0.3 : 0 }} className="flex flex-col items-center w-full max-w-4xl outline-none"
@@ -30,7 +30,7 @@ const WorkshopView = memo(function WorkshopView() {
       <button 
         onMouseEnter={() => setBackHover(true)} 
         onMouseLeave={() => setBackHover(false)} 
-        onClick={() => { playBackSound(); setActiveView('main'); }} 
+        onClick={() => { playPressSound(); setActiveView('main'); }} 
         className={`w-72 h-12 flex items-center justify-center transition-colors text-2xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${backHover ? 'text-[#FFFF55]' : 'text-white'}`}
         style={{ 
           backgroundImage: backHover ? "url('/images/button_highlighted.png')" : "url('/images/Button_Background.png')", 

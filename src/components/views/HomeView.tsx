@@ -11,7 +11,7 @@ const HomeView = memo(function HomeView() {
   const { setActiveView, setShowCredits, focusSection, onNavigateToSkin } =
     useUI();
   const { profile, legacyMode } = useConfig();
-  const { playClickSound, playSfx } = useAudio();
+  const { playPressSound, playSfx } = useAudio();
   const {
     handleLaunch,
     isGameRunning,
@@ -84,7 +84,7 @@ const HomeView = memo(function HomeView() {
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [menuFocus, buttons, playClickSound, isFocusedSection, onNavigateToSkin]);
+  }, [menuFocus, buttons, playPressSound, isFocusedSection, onNavigateToSkin]);
 
   return (
     <motion.div
@@ -102,7 +102,7 @@ const HomeView = memo(function HomeView() {
           onMouseLeave={() => setMenuFocus(null)}
           onClick={() => {
             if (isFocusedSection) {
-              playClickSound();
+              playPressSound();
               btn.action();
             }
           }}
@@ -127,7 +127,7 @@ const HomeView = memo(function HomeView() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
-                if (isFocusedSection) playClickSound();
+                if (isFocusedSection) playPressSound();
               }}
               className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
             >
@@ -144,7 +144,7 @@ const HomeView = memo(function HomeView() {
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
-                if (isFocusedSection) playClickSound();
+                if (isFocusedSection) playPressSound();
               }}
               className={`hover:scale-110 transition-transform ${!isFocusedSection ? "pointer-events-none" : ""}`}
             >

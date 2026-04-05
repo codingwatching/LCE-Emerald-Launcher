@@ -16,7 +16,7 @@ export const ClickParticles: React.FC = React.memo(() => {
   const [bursts, setBursts] = useState<Particle[]>([]);
 
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
+    const handlePressSound = (e: MouseEvent) => {
       const newParticles: Particle[] = [];
       const particleCount = 8;
 
@@ -38,8 +38,8 @@ export const ClickParticles: React.FC = React.memo(() => {
       }, 1000);
     };
 
-    window.addEventListener("mousedown", handleClick);
-    return () => window.removeEventListener("mousedown", handleClick);
+    window.addEventListener("mousedown", handlePressSound);
+    return () => window.removeEventListener("mousedown", handlePressSound);
   }, []);
 
   return (

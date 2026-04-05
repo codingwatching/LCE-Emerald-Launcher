@@ -5,7 +5,8 @@ export default function CustomTUModal({
   isOpen,
   onClose,
   onImport,
-  playSfx,
+  playPressSound,
+  playBackSound,
   editingEdition = null,
 }: any) {
   const [name, setName] = useState("");
@@ -34,14 +35,14 @@ export default function CustomTUModal({
     }
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        playSfx("close_click.wav");
+        playBackSound("close_click.wav");
         onClose();
       } else if (e.key === "Enter") {
         if (focusIndex === 3) {
-          playSfx("close_click.wav");
+          playBackSound("close_click.wav");
           onClose();
         } else if (focusIndex === 4 || e.ctrlKey) {
-          playSfx("save_click.wav");
+          playPressSound("save_click.wav");
           handleImport();
         }
       } else if (e.key === "ArrowDown" || e.key === "Tab") {
@@ -152,7 +153,7 @@ export default function CustomTUModal({
           <button
             onMouseEnter={() => setFocusIndex(3)}
             onClick={() => {
-              playSfx("close_click.wav");
+              playBackSound("close_click.wav");
               onClose();
             }}
             className={`flex-1 h-12 flex items-center justify-center text-xl mc-text-shadow transition-all outline-none border-none bg-transparent ${focusIndex === 3 ? "text-[#FFFF55]" : "text-white"}`}
@@ -167,7 +168,7 @@ export default function CustomTUModal({
           <button
             onMouseEnter={() => setFocusIndex(4)}
             onClick={() => {
-              playSfx("save_click.wav");
+              playPressSound("save_click.wav");
               handleImport();
             }}
             className={`flex-1 h-12 flex items-center justify-center text-xl mc-text-shadow transition-all outline-none border-none bg-transparent ${focusIndex === 4 ? "text-[#FFFF55]" : "text-white"}`}

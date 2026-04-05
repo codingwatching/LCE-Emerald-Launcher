@@ -5,11 +5,11 @@ import { memo } from "react";
 const appWindow = getCurrentWindow();
 
 interface AppHeaderProps {
-  playClickSound: () => void;
+  playPressSound: () => void;
   uiFade: any;
 }
 
-export const AppHeader = memo(function AppHeader({ playClickSound, uiFade }: AppHeaderProps) {
+export const AppHeader = memo(function AppHeader({ playPressSound, uiFade }: AppHeaderProps) {
   return (
     <motion.div
       key="header"
@@ -34,7 +34,7 @@ export const AppHeader = memo(function AppHeader({ playClickSound, uiFade }: App
       <div className="flex items-center gap-1 pr-2">
         <button
           onClick={() => {
-            playClickSound();
+            playPressSound();
             appWindow.minimize();
           }}
           className="w-10 h-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 transition-all bg-transparent"
@@ -54,7 +54,7 @@ export const AppHeader = memo(function AppHeader({ playClickSound, uiFade }: App
         </button>
         <button
           onClick={() => {
-            playClickSound();
+            playPressSound();
             appWindow.toggleMaximize();
           }}
           className="w-10 h-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 transition-all bg-transparent"
@@ -74,7 +74,7 @@ export const AppHeader = memo(function AppHeader({ playClickSound, uiFade }: App
         </button>
         <button
           onClick={() => {
-            playClickSound();
+            playPressSound();
             appWindow.close();
           }}
           className="w-10 h-8 flex items-center justify-center text-gray-300 hover:text-white hover:bg-red-600 transition-all bg-transparent"

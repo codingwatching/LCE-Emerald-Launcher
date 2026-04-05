@@ -41,7 +41,7 @@ export function useAudioController({ musicVol, sfxVol, showIntro, isGameRunning,
     a.play().catch(() => { });
   }, [sfxVol]);
 
-  const playClickSound = useCallback(() => playSfx("click.wav"), [playSfx]);
+  const playPressSound = useCallback(() => playSfx("press.wav"), [playSfx]);
   const playBackSound = useCallback(() => playSfx("back.ogg"), [playSfx]);
   const playSplashSound = useCallback(() => playSfx("orb.ogg"), [playSfx]);
 
@@ -174,7 +174,7 @@ export function useAudioController({ musicVol, sfxVol, showIntro, isGameRunning,
     splashIndex,
     setSplashIndex,
     cycleSplash,
-    playClickSound,
+    playPressSound,
     playBackSound,
     playSfx,
     tracks: TRACKS,

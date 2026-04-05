@@ -25,7 +25,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
     rpcEnabled: configRpc,
     keepLauncherOpen: configKeepOpen
   } = useConfig();
-  const { playClickSound, playSfx } = useAudio();
+  const { playPressSound, playSfx } = useAudio();
 
   const { editions } = useGame();
   const titleImage = editions.find(e => e.id === profile)?.titleImage || "/images/MenuTitle.png";
@@ -103,12 +103,12 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
   };
 
   const handleRunnerSelect = (runnerId: string) => {
-    playClickSound();
+    playPressSound();
     setSelectedRunner(runnerId);
   };
 
   const handleNext = async () => {
-    playClickSound();
+    playPressSound();
 
     if (currentStep === 0) {
       setUsername(tempUsername);
@@ -136,7 +136,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
   };
 
   const handleBack = () => {
-    playClickSound();
+    playPressSound();
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
       setFocusIndex(0);
@@ -180,10 +180,10 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
             else if (focusIndex === 1) handleNext();
           }
         } else if (currentStep === 2) {
-          if (focusIndex === 0) { setEnableTrayIcon(!enableTrayIcon); playClickSound(); }
-          else if (focusIndex === 1) { setEnableVfx(!enableVfx); playClickSound(); }
-          else if (focusIndex === 2) { setEnableDiscordRPC(!enableDiscordRPC); playClickSound(); }
-          else if (focusIndex === 3) { setKeepLauncherOpen(!keepLauncherOpen); playClickSound(); }
+          if (focusIndex === 0) { setEnableTrayIcon(!enableTrayIcon); playPressSound(); }
+          else if (focusIndex === 1) { setEnableVfx(!enableVfx); playPressSound(); }
+          else if (focusIndex === 2) { setEnableDiscordRPC(!enableDiscordRPC); playPressSound(); }
+          else if (focusIndex === 3) { setKeepLauncherOpen(!keepLauncherOpen); playPressSound(); }
           else if (focusIndex === 4) handleBack();
           else if (focusIndex === 5) handleNext();
         } else if (currentStep === 3) {
@@ -197,7 +197,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
   }, [currentStep, focusIndex, runners, enableTrayIcon, enableVfx, enableDiscordRPC, keepLauncherOpen, isLinux, isMac, tempUsername]);
 
   const handleMacosSetup = async () => {
-    playClickSound();
+    playPressSound();
     setIsSettingUpRuntime(true);
     setSetupProgress({ stage: "preparing", message: "Preparing macOS runtime setup...", percent: 0 });
 
@@ -444,7 +444,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
                               </div>
                               <button
                                 onClick={() => {
-                                  playClickSound();
+                                  playPressSound();
                                   setEnableTrayIcon(!enableTrayIcon);
                                 }}
                                 onMouseEnter={() => setFocusIndex(0)}
@@ -468,7 +468,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
                               </div>
                               <button
                                 onClick={() => {
-                                  playClickSound();
+                                  playPressSound();
                                   setEnableVfx(!enableVfx);
                                 }}
                                 onMouseEnter={() => setFocusIndex(1)}
@@ -492,7 +492,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
                               </div>
                               <button
                                 onClick={() => {
-                                  playClickSound();
+                                  playPressSound();
                                   setEnableDiscordRPC(!enableDiscordRPC);
                                 }}
                                 onMouseEnter={() => setFocusIndex(2)}
@@ -516,7 +516,7 @@ const SetupView: React.FC<SetupViewProps> = ({ onComplete }) => {
                               </div>
                               <button
                                 onClick={() => {
-                                  playClickSound();
+                                  playPressSound();
                                   setKeepLauncherOpen(!keepLauncherOpen);
                                 }}
                                 onMouseEnter={() => setFocusIndex(3)}

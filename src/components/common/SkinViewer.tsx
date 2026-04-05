@@ -7,7 +7,7 @@ import { useConfig } from '../../context/LauncherContext';
 interface SkinViewerProps {
   username: string;
   setUsername: (name: string) => void;
-  playClickSound: () => void;
+  playPressSound: () => void;
   skinUrl: string;
   setSkinUrl: (url: string) => void;
   setActiveView: (view: string) => void;
@@ -15,7 +15,7 @@ interface SkinViewerProps {
   onNavigateRight: () => void;
 }
 
-const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSound, skinUrl, setSkinUrl, setActiveView, isFocusedSection, onNavigateRight }: SkinViewerProps) {
+const SkinViewer = memo(function SkinViewer({ username, setUsername, playPressSound, skinUrl, setSkinUrl, setActiveView, isFocusedSection, onNavigateRight }: SkinViewerProps) {
   const mountRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [focusIndex, setFocusIndex] = useState(0);
@@ -232,13 +232,13 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
         if (focusIndex === 0) {
           (containerRef.current?.querySelector('input') as HTMLElement)?.focus();
         } else if (focusIndex === 1) {
-          playClickSound();
+          playPressSound();
           setActiveView('skins');
         } else if (focusIndex === 2) {
-          playClickSound();
+          playPressSound();
           setShowLayers(!showLayers);
         } else if (focusIndex === 3) {
-          playClickSound();
+          playPressSound();
           setSkinUrl('/images/Default.png');
         }
       }
@@ -246,7 +246,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFocusedSection, focusIndex, onNavigateRight, playClickSound, setActiveView, setShowLayers, showLayers, setSkinUrl, legacyMode]);
+  }, [isFocusedSection, focusIndex, onNavigateRight, playPressSound, setActiveView, setShowLayers, showLayers, setSkinUrl, legacyMode]);
 
   useEffect(() => {
     if (isFocusedSection) {
@@ -289,7 +289,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
         <button
           data-focus="1" tabIndex={0}
           onMouseEnter={() => isFocusedSection && setFocusIndex(1)}
-          onClick={() => { playClickSound(); setActiveView('skins'); }}
+          onClick={() => { playPressSound(); setActiveView('skins'); }}
           className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 1 ? 'scale-110' : ''}`}
           style={isFocusedSection && focusIndex === 1 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
           title="Change Skin"
@@ -300,7 +300,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
           <button
             data-focus="2" tabIndex={0}
             onMouseEnter={() => isFocusedSection && setFocusIndex(2)}
-            onClick={() => { playClickSound(); setShowLayers(!showLayers); }}
+            onClick={() => { playPressSound(); setShowLayers(!showLayers); }}
             className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 2 ? 'scale-110' : ''}`}
             style={isFocusedSection && focusIndex === 2 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
             title="Toggle Layers"
@@ -312,7 +312,7 @@ const SkinViewer = memo(function SkinViewer({ username, setUsername, playClickSo
           <button
             data-focus="3" tabIndex={0}
             onMouseEnter={() => isFocusedSection && setFocusIndex(3)}
-            onClick={() => { playClickSound(); setSkinUrl('/images/Default.png'); }}
+            onClick={() => { playPressSound(); setSkinUrl('/images/Default.png'); }}
             className={`mc-sq-btn w-12 h-12 flex items-center justify-center outline-none border-none transition-all ${isFocusedSection && focusIndex === 3 ? 'scale-110' : ''}`}
             style={isFocusedSection && focusIndex === 3 ? { backgroundImage: "url('/images/Button_Square_Highlighted.png')" } : {}}
             title="Reset to Default"

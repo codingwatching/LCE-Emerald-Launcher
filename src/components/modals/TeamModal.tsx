@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 export default function TeamModal({
   isOpen,
   onClose,
-  playClickSound,
+  playPressSound,
   playSfx,
 }: any) {
   const [focusIndex, setFocusIndex] = useState(0);
@@ -38,7 +38,7 @@ export default function TeamModal({
           playSfx("close_click.wav");
           onClose();
         } else {
-          playClickSound();
+          playPressSound();
           window.open(team[focusIndex].url, "_blank", "noopener,noreferrer");
         }
       }
@@ -74,7 +74,7 @@ export default function TeamModal({
               href={dev.url}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => playClickSound()}
+              onClick={() => playPressSound()}
               onMouseEnter={() => setFocusIndex(idx)}
               className={`w-56 h-10 flex items-center justify-center mc-text-shadow text-xl transition-all outline-none border-none bg-transparent ${focusIndex === idx ? "text-[#FFFF55]" : "text-white"}`}
               style={{

@@ -4,19 +4,19 @@ import { useUI, useAudio, useConfig } from "../../context/LauncherContext";
 export default function DevtoolsView() {
   const { setActiveView } = useUI();
   const [backHover, setBackHover] = useState(false);
-  const { playBackSound } = useAudio();
+  const { playPressSound } = useAudio();
   const [focusIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === "Backspace") {
-        playBackSound();
+        playPressSound();
         setActiveView("main");
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [playBackSound, setActiveView]);
+  }, [playPressSound, setActiveView]);
 
   useEffect(() => {
     if (focusIndex !== null) {
@@ -57,7 +57,7 @@ export default function DevtoolsView() {
         onMouseEnter={() => setBackHover(true)}
         onMouseLeave={() => setBackHover(false)}
         onClick={() => {
-          playBackSound();
+          playPressSound();
           setActiveView("main");
         }}
         className={`w-72 h-12 flex items-center justify-center transition-colors text-2xl mc-text-shadow outline-none border-none hover:text-[#FFFF55] ${backHover ? "text-[#FFFF55]" : "text-white"}`}
