@@ -492,7 +492,6 @@ const SettingsView = memo(function SettingsView() {
       </h2>
 
       {currentSubMenu === "main" ? (
-        // Main settings menu - original style with button textures
         <div className="w-full max-w-[540px] space-y-2 mb-4 p-6 flex flex-col items-center overflow-y-auto max-h-[55vh]">
           {settingsItems.map((item, index) => {
             if (item.id === "back") return null;
@@ -557,7 +556,6 @@ const SettingsView = memo(function SettingsView() {
           })}
         </div>
       ) : (
-        // Sub-menus - new style with background.png and toggle switches
         <div 
           className="min-w-[420px] w-fit p-6 flex flex-col items-center"
           style={{
