@@ -38,9 +38,6 @@
   - [Linux](#linux)
 - [Game Versions & Partnerships](#game-versions--partnerships)
 - [Building from Source](#building-from-source)
-- [Development](#development)
-  - [Project Structure](#project-structure)
-  - [Tech Stack](#tech-stack)
 - [Troubleshooting](#troubleshooting)
 - [Roadmap](#roadmap)
 - [Acknowledgments](#acknowledgments)
@@ -204,57 +201,6 @@ pnpm flatpak
 
 ---
 
-## Development
-
-### Project Structure
-
-```
-Emerald-Legacy-Launcher/
-├── src/                    # React frontend
-│   ├── components/         # UI components
-│   ├── context/            # React context providers
-│   ├── hooks/              # Custom React hooks
-│   ├── pages/              # Page components
-│   ├── services/           # API/services layer
-│   └── css/                # Global styles
-├── src-tauri/              # Rust backend
-│   ├── src/                # Rust source code
-│   ├── Cargo.toml          # Rust dependencies
-│   └── tauri.conf.json     # Tauri configuration
-├── public/                 # Static assets
-├── flatpak/                # Flatpak build config
-└── scripts/                # Build scripts
-```
-
-### Tech Stack
-
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| **Backend** | Rust | 2021 Edition |
-| **Framework** | Tauri | v2 |
-| **Frontend** | React | ^19.1.0 |
-| **Language** | TypeScript | ~5.8.3 |
-| **Styling** | TailwindCSS | v4 |
-| **Animations** | Framer Motion | ^12.36.0 |
-| **3D Rendering** | Three.js | ^0.183.2 |
-| **Build Tool** | Vite | ^7.0.4 |
-
-### Key Dependencies
-
-**Rust Crates:**
-- `tauri` — Cross-platform app framework
-- `serde` — Serialization
-- `reqwest` — HTTP client
-- `tokio` — Async runtime
-- `rfd` — Native file dialogs
-
-**Frontend Packages:**
-- `@tauri-apps/api` — Tauri JS API
-- `tauri-plugin-drpc` — Discord Rich Presence
-- `tauri-plugin-gamepad-api` — Controller support
-
----
-
 ## Troubleshooting
 
 ### macOS "App is Damaged" Error
@@ -293,13 +239,6 @@ sudo apt install --reinstall libwebkit2gtk-4.1-0
 
 Track our progress and upcoming features on the [Development Roadmap](https://github.com/orgs/Emerald-Legacy-Launcher/projects/2).
 
-**Planned Features:**
-- [ ] Workshop content browser
-- [ ] Additional TU versions support
-- [ ] Enhanced mod support
-- [ ] Cloud sync for settings/skins
-- [ ] Auto-updater integration
-
 ---
 
 ## Acknowledgments
@@ -308,7 +247,7 @@ Track our progress and upcoming features on the [Development Roadmap](https://gi
 
 - **The Emerald Team** — Technical development and maintenance
 - **4J Studios & Mojang** — Original creators of Legacy Console Edition
-- **smartcmd & The LCE Community** — Research and foundations for LCE on PC
+- **The LCE Community** — Research and foundations for LCE on PC
 - **Tauri & Rust Communities** — Core technologies and ecosystem
 
 ---
