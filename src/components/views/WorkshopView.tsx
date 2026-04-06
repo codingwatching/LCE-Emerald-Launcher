@@ -373,7 +373,7 @@ function PackageCard({ pkg, index, focused, onHover, onClick }: {
         {imgError ? (
           <span className="text-[#555] text-sm mc-text-shadow uppercase">No Image</span>
         ) : (
-          <img src={thumbnailUrl} alt={pkg.name} className="w-full h-full object-cover"
+          <img src={thumbnailUrl} alt={pkg.name} className="w-full h-full object-contain object-center"
             style={{ imageRendering: 'pixelated' }} onError={() => setImgError(true)} />
         )}
       </div>
@@ -452,7 +452,7 @@ function PackageModal({ pkg, onClose, playPressSound }: {
                 <span className="text-[#555] mc-text-shadow uppercase">No Image</span>
               </div>
             ) : (
-              <img src={thumbnailUrl} alt={pkg.name} className="w-full h-full object-cover"
+              <img src={thumbnailUrl} alt={pkg.name} className="w-full h-full object-contain object-center"
                 style={{ imageRendering: 'pixelated' }} onError={() => setImgError(true)} />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
