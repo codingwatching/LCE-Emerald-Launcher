@@ -123,7 +123,7 @@ const HomeView = memo(function HomeView() {
         <div className="pt-4 flex flex-col items-center w-full gap-3">
           <div className="flex gap-8">
             <a
-              href="https://discord.gg/YBy7kbnR4m"
+              href="https://discord.gg/vD8akRU24f"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
@@ -140,7 +140,7 @@ const HomeView = memo(function HomeView() {
               />
             </a>
             <a
-              href="https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher"
+              href="https://github.com/LCE-Hub/LCE-Emerald-Launcher"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
