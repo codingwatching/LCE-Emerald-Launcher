@@ -3,9 +3,9 @@
 # Post-install script for PKG installer
 # Automatically removes quarantine attributes from the installed app
 
-APP_PATH="$2/Applications/Emerald Legacy Launcher.app"
+APP_PATH="$2/Applications/LCE Emerald Launcher.app"
 
-echo "Removing quarantine attributes from Emerald Legacy Launcher..."
+echo "Removing quarantine attributes from LCE Emerald Launcher..."
 
 if [ -d "$APP_PATH" ]; then
     xattr -cr "$APP_PATH"

@@ -37,7 +37,7 @@ const HomeView = memo(function HomeView() {
             ? `Play Game`
             : `Download ${selectedVersionName}`,
         action: isDownloading
-          ? () => {}
+          ? () => { }
           : isInstalled
             ? handleLaunch
             : () => toggleInstall(profile),
@@ -140,7 +140,7 @@ const HomeView = memo(function HomeView() {
               />
             </a>
             <a
-              href="https://github.com/Emerald-Legacy-Launcher/Emerald-Legacy-Launcher"
+              href="https://github.com/LCE-Hub/LCE-Emerald-Launcher"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
