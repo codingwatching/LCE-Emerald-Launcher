@@ -19,6 +19,7 @@ const DEFAULT_SKINS: SavedSkin[] = [
   { id: 'mr_anilex', name: 'mr_anilex', url: '/Skins/mr_anilex.png' },
   { id: 'neoapps', name: 'neoapps', url: '/Skins/neoapps.png' },
   { id: 'peter', name: 'Peter', url: '/Skins/Peter.png' },
+  { id: 'piebot', name: 'piebot', url: '/Skins/piebot.png' }
 ];
 
 const SkinsView = memo(function SkinsView() {

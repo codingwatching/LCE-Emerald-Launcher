@@ -43,6 +43,7 @@ const SPLASHES = [
   "Fat free!", "GOTY!", "Water proof!", "LALALA-LAVA", "CHICHICHI-CHICKEN", "Tasty ah hell",
   "1% sugar!", "150% hyperbole!", "Hotter than the sun!", "Woo, reddit!",
   "J'ai fait une blague à un poisson il m'a dit que c'était trop marin !",
+  "piebot was here!", "Legacy in an evolved manner."
 ];
 
 interface AudioControllerProps {
