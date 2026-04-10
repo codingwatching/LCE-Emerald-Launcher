@@ -9,7 +9,7 @@ const BASE_EDITIONS = [
     url: "https://codeberg.org/piebot/LegacyEvolved/releases/download/nightly/LCEWindows64.zip",
     titleImage: "/images/minecraft_title_neoLegacy.png",
     supportsSlimSkins: true,
-    logo: "/images/legacy_evolved.png"
+    logo: "/images/neoLegacy.png"
   },
   {
     id: "revelations",
